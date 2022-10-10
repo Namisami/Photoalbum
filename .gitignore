@@ -1,0 +1,4 @@
+backend/.venv
+backend/core/*/migrations
+backend/core/*/__pycache__
+backend/core/media
