@@ -8,7 +8,7 @@ from .serializers import PictureListSerializer, PictureDetailSerializer, Picture
 
 
 class PictureViewSet(ModelViewSet):
-    queryset = Picture.objects.filter(subcategory=None)
+    queryset = Picture.objects.filter()
     serializer_class = PictureListSerializer
     # action_serializers = {
     #     'retrieve': PictureDetailSerializer,

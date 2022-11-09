@@ -9,6 +9,7 @@ class PictureListSerializer(HyperlinkedModelSerializer):
     #     fields = super(PictureListSerializer, self).get_fields(*args, **kwargs)
     #     fields['subcategory'].queryset = Subcategory._default_manager.filter(category=request_user.category)
     #     return fields
+    id = serializers.ReadOnlyField()
 
     class Meta:
         model = Picture
