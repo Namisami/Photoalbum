@@ -1,15 +1,67 @@
-from unicodedata import category
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
+from django.core import serializers
 
 from .models import Picture, Album, Author, Category, Subcategory
 from .serializers import PictureListSerializer, PictureDetailSerializer, PictureCreateSerializer, AlbumSerializer, AuthorSerializer, CategorySerializer, SubcategorySerializer
 
 
 class PictureViewSet(ModelViewSet):
-    queryset = Picture.objects.filter()
+    parser_classes = (MultiPartParser, FormParser, FileUploadParser)
+    queryset = Picture.objects.all()
     serializer_class = PictureListSerializer
+
+    def create(self, request):
+        print(request.data)
+        request_data = request.data
+        request_data["subcategory"] = request_data.getlist("subcategory")
+        # request_data.pop("subcategory")
+        # serializer = self.get_serializer(data=request_data)
+        # print("============================")
+        # print(serializer.is_valid())
+        # print(serializer.errors)
+        # print(serializer.initial_data)
+        # print("============================")
+        # if serializer.is_valid():
+        #     print(serializer.validated_data)
+        #     serializer.save()
+        #     return Response(serializer.data)
+        # return Response({
+        #     "error": "invalid data",
+        # });
+        authr_nickname = 0 | request_data["author.nickname"]
+        print(authr_nickname)
+        author = Author.objects.get_or_create(
+            nickname=request_data["author.nickname"]
+        )[0]
+        category = Category.objects.get_or_create(
+            title=request_data["category.title"]
+        )[0]
+        subcategories = []
+        for subcategory in request_data["subcategory"]:
+            subcategory = Subcategory.objects.get_or_create(
+                title=subcategory,
+                category=category
+            )[0]
+            subcategories.append(subcategory.id)
+        picture = Picture.objects.create(
+            photo_file=request_data["photo_file"],
+            description=request_data["description"],
+            author=author,
+            category=category,
+        )
+        for subcategory in subcategories:
+            picture.subcategory.add(subcategory)
+        serialized = serializers.serialize('json', [picture, ])
+        # serializer = self.get_serializer(data=picture)
+        # print(serializer.is_valid())
+        return Response(serialized)
+        return Response({
+            "error": "invalid data",
+        });
+
     # action_serializers = {
     #     'retrieve': PictureDetailSerializer,
     #     'create': PictureCreateSerializer,

@@ -27,9 +27,9 @@ class Category(models.Model):
 
 
 class Subcategory(models.Model):
-    title = models.CharField(verbose_name="Название", max_length=255, unique=True)
-    description = models.TextField(verbose_name="Описание", blank=True)
-    category = models.ForeignKey(verbose_name="Категория", to=Category, on_delete=models.CASCADE, null=True)
+    title = models.CharField(verbose_name="Название", max_length=255)
+    description = models.TextField(verbose_name="Описание", blank=True, null=True)
+    category = models.ForeignKey(verbose_name="Категория", to=Category, on_delete=models.PROTECT, null=True, blank=True)
     # owner = models.ForeignKey(verbose_name="Владелец", to=User, on_delete=models.CASCADE)
 
     def __str__(self):
