@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import FormInput from '../FormInput/FormInput';
-import './PictureList.css';
+import './PictureElement.css';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 
@@ -8,7 +8,7 @@ const API_URL = 'http://127.0.0.1:9000/api/v1';
 
 
 function PictureList(props) {
-  const [pictureList, setPictureList] = useState(0);
+  const [pictureInfo, setPictureInfo] = useState(0);
 
   const [formValue, setFormValue] = useState({
     'photo_file': undefined,
@@ -19,31 +19,18 @@ function PictureList(props) {
   });
 
   const params = useParams()
-    
-  // const [photoFile, setPhotoFile] = useState();
-  // const [description, setDescription] = useState(0);
-  // const [author, setAuthor] = useState(0);
-  // const [category, setCategory] = useState(0);
-  // const [subcategory, setSubcategory] = useState([]);
   
-  const getPictures = async () => {
-    const url = `${API_URL}/albums/${params.albumId}`;
-    let pictureList;
+  const getPictureInfo = async () => {
+    const url = `${API_URL}/pictures/${params.pictureId}`;
+    let pictureInfo;
     await axios
       .get(url)
-      .then(response => pictureList = response.data.picture);
-
-    let i = 0;
-    while (i < pictureList.length - 1) {
-      pictureList[i].id = pictureList[i].url.split("/").slice(-2, -1)[0];
-      i++;
-    }
-    console.log(pictureList)
-    return setPictureList(pictureList);
+      .then(response => pictureInfo = response.data);
+    return setPictureInfo(pictureInfo);
   };
     
   useEffect(() => {
-    getPictures();
+    getPictureInfo();
   }, [])
   
   const postEntry = async (e) => {
@@ -77,32 +64,24 @@ function PictureList(props) {
       })
       .then(res => console.log(res.data));
     
-    return getPictures();
+    return getPictureInfo();
   }
 
-  const picturePropsList = Array.from({pictureList}.pictureList).map((picture) => {
-    console.log(picture.id)
-    return (
-      <li key={ picture.id }>
-        <a href={`/pictures/${picture.id}`}>
-          <img width="100" src={`${picture.photo_file}`} alt='Album element' />
-          <p>{ picture.url }</p>
-        </a>
-      </li>
-    )
-  });
+  // const picturePropsList = Array.from({pictureList}.pictureList).map((picture) => {
+  //   console.log(picture.id)
+  //   return (
+  //     <li key={ picture.id }>
+  //       <a href={`/pictures/${picture.id}`}>
+  //         <img width="100" src={`${picture.photo_file}`} alt='Album element' />
+  //         <p>{ picture.url }</p>
+  //       </a>
+  //     </li>
+  //   )
+  // });
 
   const subcategoryInput = () => {
     if (formValue["category"]) {
       return (
-        // <label>
-        //   Подкатегории <br />
-        //   <input
-        //     name='subcategory'
-        //     id="subcategory" 
-        //     onChange={ handleSubcategoryChange }
-        //   />
-        // </label>
         <FormInput 
             name='subcategory' 
             title='Подкатегории' 
@@ -156,8 +135,10 @@ function PictureList(props) {
   return ( 
       <div className="App">
         <p>Список говна</p>
-        <ul>{ picturePropsList }</ul>
-        <button onClick={ getPictures }>Update</button>
+        <div>
+          <img src={ pictureInfo.photo_file }></img>
+        </div>
+        <button onClick={ getPictureInfo }>Update</button>
         <form method='post'
           onSubmit={ postEntry }
         >

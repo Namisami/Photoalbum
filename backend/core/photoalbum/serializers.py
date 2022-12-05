@@ -1,14 +1,19 @@
 from rest_framework import serializers
-from rest_framework.serializers import HyperlinkedModelSerializer, ListSerializer, SlugRelatedField
+from rest_framework.serializers import HyperlinkedModelSerializer, ListSerializer, SlugRelatedField, ReadOnlyField, IntegerField
 
 from .models import Picture, Album, Author, Category, Subcategory
 
 
+# class PictureSerializer(HyperlinkedModelSerializer):
+#     id = ReadOnlyField()
+#     class Meta:
+#         model = Picture
+#         exclude = ['url', 'id', 'pk', 'photo_file', 'description', 'upload_date', 'author', 'category', 'subcategory']
+
 class PictureCreateSerializer(HyperlinkedModelSerializer):
     class Meta:
         model = Picture
-        exclude = ['subcategory']
-
+        fields = '__all__'
 
 class PictureDetailSerializer(HyperlinkedModelSerializer):
     class Meta:
@@ -17,9 +22,11 @@ class PictureDetailSerializer(HyperlinkedModelSerializer):
 
 
 class AlbumSerializer(HyperlinkedModelSerializer):
+    # id = IntegerField(read_only=True)
     class Meta:
         model = Album
-        fields = '__all__'
+        fields = ['url', 'id', 'title', 'description', 'cover', 'created_at', 'picture']
+        depth = 1
 
 
 class AuthorSerializer(HyperlinkedModelSerializer):
@@ -64,6 +71,8 @@ class PictureListSerializer(HyperlinkedModelSerializer):
     #     print(fields)
         # fields['subcategory'].queryset = Subcategory._default_manager.filter(category=request_user.category)
         # return fields
+
+    # id = IntegerField(read_only=True)
     # author = AuthorSerializer()
     # category = CategorySerializer()
     # subcategory = SubcategorySerializer(many=True)

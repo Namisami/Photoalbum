@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import FormInput from '../FormInput/FormInput';
 import './App.css';
 import axios from 'axios';
+import Header from '../Header/Header';
 
 const API_URL = 'http://127.0.0.1:9000/api/v1';
 
@@ -9,11 +10,19 @@ const API_URL = 'http://127.0.0.1:9000/api/v1';
 function App() {
   const [pictureList, setPictureList] = useState(0);
 
-  const [photoFile, setPhotoFile] = useState();
-  const [author, setAuthor] = useState(0);
-  const [category, setCategory] = useState(0);
-  const [description, setDescription] = useState(0);
-  const [subcategory, setSubcategory] = useState([]);
+  const [formValue, setFormValue] = useState({
+    'photo_file': undefined,
+    'description': '',
+    'author': '',
+    'category': '',
+    'subcategory': []
+  });
+
+  // const [photoFile, setPhotoFile] = useState();
+  // const [description, setDescription] = useState(0);
+  // const [author, setAuthor] = useState(0);
+  // const [category, setCategory] = useState(0);
+  // const [subcategory, setSubcategory] = useState([]);
   
   const getPictures = async () => {
     const url = `${API_URL}/pictures/`;
@@ -32,35 +41,26 @@ function App() {
     e.preventDefault();
     const url = `${API_URL}/pictures/`;
 
+    // const formData = new FormData();
+    // formData.append("photo_file", photoFile, photoFile.name);
+    // formData.append("description", description);
+    // formData.append("author.nickname", author);
+    // formData.append("category.title", category);
+    // for (let subcat of subcategory) {
+    //   formData.append("subcategory", subcat);
+    // }
+
     const formData = new FormData();
-    formData.append("photo_file", photoFile, photoFile.name);
-    formData.append("description", description);
-    formData.append("author.nickname", author);
-    formData.append("category.title", category);
-    for (let subcat of subcategory) {
+    formData.append("photo_file", formValue["photo_file"], formValue["photo_file"].name);
+    formData.append("description", formValue["description"]);
+    formData.append("author.nickname", formValue["author"]);
+    formData.append("category.title", formValue["category"]);
+    for (let subcat of formValue["subcategory"]) {
       formData.append("subcategory", subcat);
     }
-    // formData.append("subcategory.title", subcategory);
-
-    // let subc = [];
-    // for (let sub of subcategory) {
-    //   let su = {
-    //     'title': sub
-    //   };
-    //   subc.push(su);
-    //   console.log(subc)
-    // };
     
     await axios
-      .post(url, formData
-        // photo_file: photoFile,
-        // description: description,
-        // 'author.nickname': author,
-        // 'category.title': category,
-        // 'subcategory.title': subcategory[0],
-        // 'subcategory.title': subcategory[1],
-        // 'subcategory': {'title': subcategory},
-      , {
+      .post(url, formData, {
         headers: {
           // 'Accept': 'application/json',
           'Content-Type': 'multipart/form-data'
@@ -71,7 +71,6 @@ function App() {
     return getPictures();
   }
 
-  // console.log({pictureList});
   const picturePropsList = Array.from({pictureList}.pictureList).map((picture) => {
     return (
       <li key={picture.id}>
@@ -84,46 +83,65 @@ function App() {
   });
 
   const subcategoryInput = () => {
-    if (category) {
+    if (formValue["category"]) {
       return (
-        <label>
-            Подкатегории <br />
-            <input
-              name='subcategory'
-              id="subcategory" 
-              onChange={ handleSubcategoryChange }
-            />
-          </label>
+        // <label>
+        //   Подкатегории <br />
+        //   <input
+        //     name='subcategory'
+        //     id="subcategory" 
+        //     onChange={ handleSubcategoryChange }
+        //   />
+        // </label>
+        <FormInput 
+            name='subcategory' 
+            title='Подкатегории' 
+            onChangeValue={ handleFormValueChange } 
+          />
       )
     } else {
       return
     }
   }
 
-  const handleAuthorChange = (e) => {
-    setAuthor(e.target.value);
-  }
-
-  const handleCategoryChange = async(e) => {
-    setCategory(e.target.value);
-  }
-
-  const handleDescriptionChange = (e) => {
-    setDescription(e.target.value);
-  }
-
-  const handleSubcategoryChange = (e) => {
-    let newSubcategory = [];
-    for (let value of e.target.value.split(" ")) {
-      newSubcategory.push(value)
+  const handleFormValueChange = (e) => {
+    if (e.target.name == 'subcategory') {
+      let newSubcategory = [];
+      for (let value of e.target.value.split(" ")) {
+        newSubcategory.push(value)
+      }
+      setFormValue({ ...formValue, [e.target.name]: newSubcategory });
+    } else if (e.target.name == 'photo_file') {
+      setFormValue({ ...formValue, [e.target.name]: e.target.files[0] })
+    } else {
+      setFormValue({ ...formValue, [e.target.name]: e.target.value });
     }
-    console.log(newSubcategory);
-    setSubcategory(newSubcategory);
   }
+
+  // const handleAuthorChange = (e) => {
+  //   setAuthor(e.target.value);
+  // }
+
+  // const handleCategoryChange = async(e) => {
+  //   setCategory(e.target.value);
+  // }
+
+  // const handleDescriptionChange = (e) => {
+  //   setDescription(e.target.value);
+  // }
+
+  // const handleSubcategoryChange = (e) => {
+  //   let newSubcategory = [];
+  //   for (let value of e.target.value.split(" ")) {
+  //     newSubcategory.push(value)
+  //   }
+  //   console.log(newSubcategory);
+  //   setSubcategory(newSubcategory);
+  // }
   
-  const handlePhotoFileChange = (e) => {
-    setPhotoFile(e.target.files[0]);
-  }
+  // const handlePhotoFileChange = (e) => {
+  //   setPhotoFile(e.target.files[0]);
+  // }
 
   return ( 
       <div className="App">
@@ -143,7 +161,13 @@ function App() {
               onChange={ handlePhotoFileChange }
             />
           </label> */}
-          <FormInput name='photo_file' type='file' title='Изображение'/>
+          <FormInput 
+            name='photo_file' 
+            type='file' 
+            title='Изображение' 
+            onChangeValue={ handleFormValueChange } 
+            // onChange={ handlePhotoFileChange }
+          />
           <br />
           {/* <label>
             Описание <br />
@@ -153,25 +177,39 @@ function App() {
               onChange={ handleDescriptionChange }
             />
           </label> */}
-          <FormInput name='description' title='Описание' />
+          <FormInput 
+            name='description' 
+            title='Описание' 
+            onChangeValue={ handleFormValueChange } 
+          />
           <br />
-          <label>
+          {/* <label>
             Автор <br />
             <input
               name='author'
               id="author" 
               onChange={ handleAuthorChange }
             />
-          </label>
+          </label> */}
+          <FormInput 
+            name='author' 
+            title='Автор' 
+            onChangeValue={ handleFormValueChange } 
+          />
           <br />
-          <label>
+          {/* <label>
             Категория <br />
             <input
               name='category'
               id="category" 
               onChange={ handleCategoryChange }
             />
-          </label>
+          </label> */}
+          <FormInput 
+            name='category' 
+            title='Категория' 
+            onChangeValue={ handleFormValueChange } 
+          />
           <br />
           { subcategoryInput() }
           <br />

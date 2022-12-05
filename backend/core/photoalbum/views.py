@@ -31,8 +31,8 @@ class PictureViewSet(ModelViewSet):
         # return Response({
         #     "error": "invalid data",
         # });
-        authr_nickname = 0 | request_data["author.nickname"]
-        print(authr_nickname)
+        # authr_nickname = 0 | request_data["author.nickname"]
+        # print(authr_nickname)
         author = Author.objects.get_or_create(
             nickname=request_data["author.nickname"]
         )[0]
@@ -85,6 +85,9 @@ class PictureViewSet(ModelViewSet):
 class AlbumViewSet(ModelViewSet):
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
+
+    # def list(self, request):
+    #     print(request.data)
 
 
 class AuthorViewSet(ModelViewSet):

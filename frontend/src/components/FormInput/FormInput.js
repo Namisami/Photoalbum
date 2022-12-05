@@ -9,7 +9,6 @@ function FormInput(props) {
     for (let word of wordsInName) {
       id = id + word.charAt(0).toUpperCase() + word.slice(1);
     }
-    console.log(id);
     return id;
   }
   return (
@@ -19,10 +18,9 @@ function FormInput(props) {
         name={ props.name }
         id= { nameToId(props.name) }
         type={ props.type }
-        accept={ props.type == 'file' &&
-          'image/jpeg,image/png,image/jpg,image/webp'
+        accept={ props.type == 'file' ? 'image/jpeg,image/png,image/jpg,image/webp': undefined
         }
-        // onChange={ handlePhotoFileChange }
+        onChange={ props.onChangeValue }
       />
     </label>
   );
