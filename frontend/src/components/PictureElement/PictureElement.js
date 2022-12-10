@@ -22,9 +22,14 @@ function PictureList(props) {
   
   const getPictureInfo = async () => {
     const url = `${API_URL}/pictures/${params.pictureId}`;
+    let token = localStorage.token;
     let pictureInfo;
     await axios
-      .get(url)
+      .get(url, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(token)}`,
+        }
+      })
       .then(response => pictureInfo = response.data);
     return setPictureInfo(pictureInfo);
   };
@@ -36,6 +41,7 @@ function PictureList(props) {
   const postEntry = async (e) => {
     e.preventDefault();
     const url = `${API_URL}/pictures/`;
+    let token = localStorage.token;
 
     // const formData = new FormData();
     // formData.append("photo_file", photoFile, photoFile.name);
@@ -59,7 +65,8 @@ function PictureList(props) {
       .post(url, formData, {
         headers: {
           // 'Accept': 'application/json',
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${JSON.parse(token)}`,
         },
       })
       .then(res => console.log(res.data));
@@ -136,7 +143,7 @@ function PictureList(props) {
       <div className="App">
         <p>Список говна</p>
         <div>
-          <img src={ pictureInfo.photo_file }></img>
+          <img width='500' src={ pictureInfo.photo_file }></img>
         </div>
         <button onClick={ getPictureInfo }>Update</button>
         <form method='post'

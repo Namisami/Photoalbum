@@ -27,9 +27,15 @@ function App() {
   const getPictures = async () => {
     const url = `${API_URL}/pictures/`;
     let pictureList;
+    let token = localStorage.getItem('token');
     await axios
-      .get(url)
+      .get(url, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(token)}`,
+        }
+      })
       .then(response => pictureList = response.data);
+    console.log(pictureList);
     return setPictureList(pictureList);
   };
     
@@ -58,12 +64,15 @@ function App() {
     for (let subcat of formValue["subcategory"]) {
       formData.append("subcategory", subcat);
     }
+
+    let token = localStorage.getItem('token');
     
     await axios
       .post(url, formData, {
         headers: {
           // 'Accept': 'application/json',
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${JSON.parse(token)}`,
         },
       })
       .then(res => console.log(res.data));
@@ -85,14 +94,6 @@ function App() {
   const subcategoryInput = () => {
     if (formValue["category"]) {
       return (
-        // <label>
-        //   Подкатегории <br />
-        //   <input
-        //     name='subcategory'
-        //     id="subcategory" 
-        //     onChange={ handleSubcategoryChange }
-        //   />
-        // </label>
         <FormInput 
             name='subcategory' 
             title='Подкатегории' 

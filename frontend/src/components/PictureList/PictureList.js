@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import FormInput from '../FormInput/FormInput';
 import './PictureList.css';
 import axios from 'axios';
@@ -29,12 +30,17 @@ function PictureList(props) {
   const getPictures = async () => {
     const url = `${API_URL}/albums/${params.albumId}`;
     let pictureList;
+    let token = localStorage.token;
     await axios
-      .get(url)
+      .get(url, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(token)}`,
+        }
+      })
       .then(response => pictureList = response.data.picture);
 
     let i = 0;
-    while (i < pictureList.length - 1) {
+    while (i <= pictureList.length - 1) {
       pictureList[i].id = pictureList[i].url.split("/").slice(-2, -1)[0];
       i++;
     }
@@ -49,6 +55,7 @@ function PictureList(props) {
   const postEntry = async (e) => {
     e.preventDefault();
     const url = `${API_URL}/pictures/`;
+    let token = localStorage.access;
 
     // const formData = new FormData();
     // formData.append("photo_file", photoFile, photoFile.name);
@@ -72,7 +79,8 @@ function PictureList(props) {
       .post(url, formData, {
         headers: {
           // 'Accept': 'application/json',
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${JSON.parse(token)}`,
         },
       })
       .then(res => console.log(res.data));
@@ -84,10 +92,10 @@ function PictureList(props) {
     console.log(picture.id)
     return (
       <li key={ picture.id }>
-        <a href={`/pictures/${picture.id}`}>
-          <img width="100" src={`${picture.photo_file}`} alt='Album element' />
+        <Link to={ `/pictures/${picture.id}` }>
+          <img width="100" src={ picture.photo_file } alt='Album element' />
           <p>{ picture.url }</p>
-        </a>
+        </Link>
       </li>
     )
   });
@@ -155,7 +163,7 @@ function PictureList(props) {
 
   return ( 
       <div className="App">
-        <p>Список говна</p>
+        <p>Список говна ({ picturePropsList.length })</p>
         <ul>{ picturePropsList }</ul>
         <button onClick={ getPictures }>Update</button>
         <form method='post'

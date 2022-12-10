@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.serializers import HyperlinkedModelSerializer, ListSerializer, SlugRelatedField, ReadOnlyField, IntegerField
 
 from .models import Picture, Album, Author, Category, Subcategory
-
+from authentication.serializers import UserSerializer
 
 # class PictureSerializer(HyperlinkedModelSerializer):
 #     id = ReadOnlyField()
@@ -23,9 +23,10 @@ class PictureDetailSerializer(HyperlinkedModelSerializer):
 
 class AlbumSerializer(HyperlinkedModelSerializer):
     # id = IntegerField(read_only=True)
+    owner = UserSerializer
     class Meta:
         model = Album
-        fields = ['url', 'id', 'title', 'description', 'cover', 'created_at', 'picture']
+        fields = ['url', 'id', 'title', 'description', 'cover', 'created_at', 'picture', 'owner']
         depth = 1
 
 
@@ -36,6 +37,7 @@ class AuthorSerializer(HyperlinkedModelSerializer):
 
 
 class CategorySerializer(HyperlinkedModelSerializer):
+    owner = UserSerializer
     class Meta:
         model = Category
         fields = '__all__'
@@ -48,6 +50,7 @@ class CategorySerializer(HyperlinkedModelSerializer):
 
 
 class SubcategorySerializer(HyperlinkedModelSerializer):
+    owner = UserSerializer
     class Meta:
         model = Subcategory
         fields = '__all__'
@@ -76,11 +79,13 @@ class PictureListSerializer(HyperlinkedModelSerializer):
     # author = AuthorSerializer()
     # category = CategorySerializer()
     # subcategory = SubcategorySerializer(many=True)
+    owner = UserSerializer
     
     class Meta:
         model = Picture
         # fields = '__all__'
-        fields = ['url', 'id', 'photo_file', 'description', 'upload_date', 'author', 'category', 'subcategory']
+        fields = ['url', 'id', 'photo_file', 'description', 'upload_date', 
+                'author', 'category', 'subcategory', 'owner']
         # depth = 1
 
     # def get(self, request, format=None):

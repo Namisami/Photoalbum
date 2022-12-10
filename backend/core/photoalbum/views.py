@@ -2,19 +2,37 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
+from rest_framework.permissions import IsAuthenticated
 from django.core import serializers
+from django.shortcuts import get_object_or_404
+
+from rest_framework_simplejwt.tokens import AccessToken
+
 
 from .models import Picture, Album, Author, Category, Subcategory
 from .serializers import PictureListSerializer, PictureDetailSerializer, PictureCreateSerializer, AlbumSerializer, AuthorSerializer, CategorySerializer, SubcategorySerializer
-
+from authentication.models import User
 
 class PictureViewSet(ModelViewSet):
     parser_classes = (MultiPartParser, FormParser, FileUploadParser)
     queryset = Picture.objects.all()
     serializer_class = PictureListSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def list(self, request):
+        user = User.objects.get(id=request.user.id)
+        queryset = Picture.objects.filter(owner=user)
+        serializer = PictureListSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        user = User.objects.get(id=request.user.id)
+        queryset = Picture.objects.all()
+        album = get_object_or_404(queryset, pk=pk, owner=user)
+        serializer = PictureListSerializer(album, context={'request': request})
+        return Response(serializer.data)
 
     def create(self, request):
-        print(request.data)
         request_data = request.data
         request_data["subcategory"] = request_data.getlist("subcategory")
         # request_data.pop("subcategory")
@@ -33,17 +51,21 @@ class PictureViewSet(ModelViewSet):
         # });
         # authr_nickname = 0 | request_data["author.nickname"]
         # print(authr_nickname)
+        # user = User.objects.get(id=request.user)
+        user = User.objects.get(id=request.user.id)
         author = Author.objects.get_or_create(
             nickname=request_data["author.nickname"]
         )[0]
         category = Category.objects.get_or_create(
-            title=request_data["category.title"]
+            title=request_data["category.title"],
+            owner=user,
         )[0]
         subcategories = []
         for subcategory in request_data["subcategory"]:
             subcategory = Subcategory.objects.get_or_create(
                 title=subcategory,
-                category=category
+                category=category,
+                owner=user,
             )[0]
             subcategories.append(subcategory.id)
         picture = Picture.objects.create(
@@ -51,6 +73,7 @@ class PictureViewSet(ModelViewSet):
             description=request_data["description"],
             author=author,
             category=category,
+            owner=user,
         )
         for subcategory in subcategories:
             picture.subcategory.add(subcategory)
@@ -85,9 +108,20 @@ class PictureViewSet(ModelViewSet):
 class AlbumViewSet(ModelViewSet):
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
+    permission_classes = (IsAuthenticated,)
 
-    # def list(self, request):
-    #     print(request.data)
+    def list(self, request):
+        user = User.objects.get(id=request.user.id)
+        queryset = Album.objects.filter(owner=user)
+        serializer = AlbumSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        user = User.objects.get(id=request.user.id)
+        queryset = Album.objects.all()
+        album = get_object_or_404(queryset, pk=pk, owner=user)
+        serializer = AlbumSerializer(album, context={'request': request})
+        return Response(serializer.data)
 
 
 class AuthorViewSet(ModelViewSet):

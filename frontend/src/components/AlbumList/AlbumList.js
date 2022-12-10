@@ -12,8 +12,14 @@ function AlbumList() {
   const getAlbums = async () => {
     const url = `${API_URL}/albums/`;
     let albumList;
+    let token = localStorage.getItem('token');
+    console.log(token);
     await axios
-      .get(url)
+      .get(url, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(token)}`,
+        }
+      })
       .then(response => albumList = response.data);
     return setAlbumList(albumList);
   };
@@ -36,7 +42,7 @@ function AlbumList() {
 
   return ( 
       <div className="album-list">
-        <p>Список говна</p>
+        <p>Список говна ({ albumPropsList.length }) </p>
         <ul>{ albumPropsList }</ul>
         <button onClick={ getAlbums }>Update</button>
       </div>
