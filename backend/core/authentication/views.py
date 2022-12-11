@@ -68,7 +68,7 @@ class UserViewSet(ModelViewSet):
     http_method_names = ['get']
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
-    # filter_backends = [filters.OrderingFilter]
+    filter_backends = [filters.OrderingFilter]
     # ordering_fields = ['updated']
     # ordering = ['-updated']
 
