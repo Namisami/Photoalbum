@@ -15,21 +15,31 @@ class UserSerializer(ModelSerializer):
         read_only_field = ['is_active', 'is_staff', 'is_superuser']
 
 
-class LoginSerializer(TokenObtainPairSerializer):
+class LoginSerializer(UserSerializer):
+    password = serializers.CharField(max_length=128, min_length=8, write_only=True, required=True)
+    email = serializers.EmailField(required=True, write_only=True, max_length=128)
+    
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'password']
 
-    def validate(self, attrs):
-        data = super().validate(attrs)
+    # def validate(self, attrs):
+    #     data = super().validate(attrs)
 
-        refresh = self.get_token(self.user)
+    #     # refresh = self.get_token(self.user)
 
-        data['user'] = UserSerializer(self.user).data
-        data['refresh'] = str(refresh)
-        data['access'] = str(refresh.access_token)
+    #     data['user'] = UserSerializer(self.user).data
+    #     # data['refresh'] = str(refresh)
+    #     # data['access'] = str(refresh.access_token)
 
-        if api_settings.UPDATE_LAST_LOGIN:
-            update_last_login(None, self.user)
+    #     if api_settings.UPDATE_LAST_LOGIN:
+    #         update_last_login(None, self.user)
 
-        return data
+    #     return data
+
+    def create(self, validated_data):
+        user = User.objects.get(email=validated_data['email'], password=validated_data['password'])
+        return user
 
 
 class RegistrationSerializer(UserSerializer):

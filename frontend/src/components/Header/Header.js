@@ -32,10 +32,10 @@ function Header() {
   };
 
   const handleAuthorization = (e) => {
-    if (localStorage.getItem('user')) {
+    if (localStorage.getItem('token')) {
       return (
         <div>
-          <Link to="/profile/">Профиль ({ userData.first_name })</Link>
+          <Link to="/profile/">Профиль</Link>
           <Link to="/logout/">Выйти</Link>
         </div>
       )

@@ -15,11 +15,31 @@ function Profile(props) {
     'password': '',
   });
 
-  const [user, setUser] = useState(0)
+  const [user, setUser] = useState({})
+  // const [token, setToken] = useState(0)
+
+  const getUser = async () => {
+    const url = `${API_URL}/users/`;
+
+    let userData;
+    let token = localStorage.getItem('token');
+
+    await axios
+      .get(url, {
+        headers: {
+          'Authorization': `${JSON.parse(token)}`,
+        },
+      })
+      .then(res => userData = res.data);
+    console.log(userData);
+    setUser(userData);
+  }
 
   useEffect(() => {
-    setUser(JSON.parse(localStorage.getItem('user')));
+    // setToken(JSON.parse(localStorage.getItem('token')));
+    getUser();
   }, [])
+
   
   const postEntry = async (e) => {
     e.preventDefault();
@@ -49,7 +69,7 @@ function Profile(props) {
 
   return ( 
       <div className="form">
-        <img src={`${ API_URL_AVATAR }${ user.photo }`} width='500' alt='User avatar'></img>
+        <img src={`${ user.photo }`} width='500' alt='User avatar'></img>
         <p>{ user.first_name } { user.last_name }</p>
         <form method='post'
           onSubmit={ postEntry }

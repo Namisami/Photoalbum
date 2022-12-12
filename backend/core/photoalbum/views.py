@@ -2,7 +2,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.core import serializers
 from django.shortcuts import get_object_or_404
 
@@ -11,6 +11,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from .models import Picture, Album, Author, Category, Subcategory
 from .serializers import PictureListSerializer, PictureDetailSerializer, PictureCreateSerializer, AlbumSerializer, AuthorSerializer, CategorySerializer, SubcategorySerializer
+from .pagination import StandardResultsSetPagination
 from authentication.models import User
 
 class PictureViewSet(ModelViewSet):
@@ -18,12 +19,16 @@ class PictureViewSet(ModelViewSet):
     queryset = Picture.objects.all()
     serializer_class = PictureListSerializer
     permission_classes = (IsAuthenticated,)
+    # pagination_class = StandardResultsSetPagination
 
     def list(self, request):
         user = User.objects.get(id=request.user.id)
         queryset = Picture.objects.filter(owner=user)
-        serializer = PictureListSerializer(queryset, many=True, context={'request': request})
-        return Response(serializer.data)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={'request': request})
+        return self.get_paginated_response(serializer.data)
+
 
     def retrieve(self, request, pk=None):
         user = User.objects.get(id=request.user.id)
@@ -113,8 +118,10 @@ class AlbumViewSet(ModelViewSet):
     def list(self, request):
         user = User.objects.get(id=request.user.id)
         queryset = Album.objects.filter(owner=user)
-        serializer = AlbumSerializer(queryset, many=True, context={'request': request})
-        return Response(serializer.data)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={'request': request})
+        return self.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None):
         user = User.objects.get(id=request.user.id)

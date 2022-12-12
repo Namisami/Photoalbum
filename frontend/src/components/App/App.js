@@ -31,7 +31,7 @@ function App() {
     await axios
       .get(url, {
         headers: {
-          'Authorization': `Bearer ${JSON.parse(token)}`,
+          'Authorization': `${JSON.parse(token)}`,
         }
       })
       .then(response => pictureList = response.data);

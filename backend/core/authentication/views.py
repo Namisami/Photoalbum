@@ -1,65 +1,88 @@
 from .serializers import UserSerializer, LoginSerializer, RegistrationSerializer
 from .models import User
 
+from django.core import serializers
+from django.forms.models import model_to_dict
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import filters, status
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
+import json
 
 
-class LoginViewSet(ModelViewSet, TokenObtainPairView):
-    serializer_class = LoginSerializer
+
+class LoginViewSet(ViewSet):
+    # serializer_class = LoginSerializer
+    # authentication_classes = (TokenAuthentication,)
     permission_classes = (AllowAny,)
     http_method_names = ['post']
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        try:
-            serializer.is_valid(raise_exception=True)
-        except TokenError as e:
-            raise InvalidToken(e.args[0])
+    def create(self, request):
+    #     print(serializer.validated_data)
+        email = request.data.get("email")
+        password = request.data.get("password")
+        
+        # serializer = LoginSerializer(data=request.data)
+        # serializer.is_valid(raise_exception=True)
+        # user = serializer.save()
+        user = authenticate(email=email, password=password)
+        token, _ = Token.objects.get_or_create(user=user)
+        # user = User.objects.get(email=user)
+        # print(user)
+        # user = model_to_dict(user)
+        # print(user)
+        # user['photo'] = str(user['photo'])
+        # data = json.dumps(user)
+        # print(data)
+        # print(user)
+        # if not user:
+        #     return Response({'error': 'Invalid Credentials'},
+        #                 status=status.HTTP_404_NOT_FOUND)
 
-        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        # serializer = UserSerializer(data=user)
+        # print(serializer.is_valid())
+        
+        print(token.key)
+        return Response({
+            # "user": data,
+            "token": token.key,
+            }, status=status.HTTP_200_OK)
 
 
-class RegistrationViewSet(ModelViewSet, TokenObtainPairView):
+class RegistrationViewSet(ModelViewSet):
     serializer_class = RegistrationSerializer
     permission_classes = (AllowAny,)
     http_method_names = ['post']
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request):
         serializer = self.get_serializer(data=request.data)
-
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        refresh = RefreshToken.for_user(user)
-        res = {
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-        }
+        token, _ = Token.objects.get_or_create(user=user)
 
         return Response({
-            "user": serializer.data,
-            "refresh": res["refresh"],
-            "token": res["access"]
+            "user": serializer.validated_data,
+            "token": token.key,
         }, status=status.HTTP_201_CREATED)
 
 
-class RefreshViewSet(ViewSet, TokenRefreshView):
+class RefreshViewSet(ViewSet):
     permission_classes = (AllowAny,)
+    authentication_classes = (TokenAuthentication,)
     http_method_names = ['post']
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
-        try:
-            serializer.is_valid(raise_exception=True)
-        except TokenError as e:
-            raise InvalidToken(e.args[0])
+        # try:
+        serializer.is_valid(raise_exception=True)
+        # except TokenError as e:
+        #     raise InvalidToken(e.args[0])
 
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
@@ -68,9 +91,17 @@ class UserViewSet(ModelViewSet):
     http_method_names = ['get']
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
     filter_backends = [filters.OrderingFilter]
     # ordering_fields = ['updated']
     # ordering = ['-updated']
+
+    def list(self, request):
+        print(request.user)
+        queryset = User.objects.get(id=request.user.id)
+        serializer = UserSerializer(queryset, context={'request': request})
+        print(serializer.data)
+        return Response(serializer.data)
 
     def get_queryset(self):
         if self.request.user.is_superuser:
