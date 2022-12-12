@@ -8,25 +8,47 @@ const API_URL = 'http://127.0.0.1:9000/api/v1';
 
 function AlbumList() {
   const [albumList, setAlbumList] = useState(0);
+  let [page, setPage] = useState(1);
+  let [buttonActivity, setButtonActivity] = useState({
+    'previous': false,
+    'next': false,
+  })
   
   const getAlbums = async () => {
-    const url = `${API_URL}/albums/`;
-    let albumList;
+    const url = `${API_URL}/albums?page=${ page }`;
     let token = localStorage.getItem('token');
-    console.log(token);
+    let resData;
+
     await axios
       .get(url, {
         headers: {
-          'Authorization': `Bearer ${JSON.parse(token)}`,
+          'Authorization': `${JSON.parse(token)}`,
         }
       })
-      .then(response => albumList = response.data);
+      .then(response => resData = response.data);
+    
+    let albumList = resData.results;
+
+    setButtonActivity({
+      previous: !!resData.previous,
+      next: !!resData.next,
+    })
     return setAlbumList(albumList);
   };
     
   useEffect(() => {
     getAlbums();
   }, [])
+
+  const nextPage = () => {
+    setPage(++page);
+    return getAlbums();
+  };
+
+  const previousPage = () => {
+    setPage(--page);
+    return getAlbums();
+  };
 
   const albumPropsList = Array.from({albumList}.albumList).map((album) => {
     console.log(album)
@@ -42,8 +64,18 @@ function AlbumList() {
 
   return ( 
       <div className="album-list">
-        <p>Список говна ({ albumPropsList.length }) </p>
-        <ul>{ albumPropsList }</ul>
+      { albumPropsList.length > 0
+        ? <div>
+          <p>Список говна ({ albumPropsList.length }) </p>
+          <div>
+            <input type='button' disabled={ !buttonActivity.previous } onClick={ previousPage } value='<' />
+            <p style={{ display: 'inline' }}>{ page }</p>
+            <input type='button' disabled={ !buttonActivity.next } onClick={ nextPage } value='>' />
+          </div>
+          <ul>{ albumPropsList }</ul>
+        </div>
+        : <p>Нет элементов</p>
+      }
         <button onClick={ getAlbums }>Update</button>
       </div>
   );

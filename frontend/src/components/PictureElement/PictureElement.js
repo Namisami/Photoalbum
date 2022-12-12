@@ -27,7 +27,7 @@ function PictureList(props) {
     await axios
       .get(url, {
         headers: {
-          'Authorization': `Bearer ${JSON.parse(token)}`,
+          'Authorization': `${JSON.parse(token)}`,
         }
       })
       .then(response => pictureInfo = response.data);
@@ -42,15 +42,6 @@ function PictureList(props) {
     e.preventDefault();
     const url = `${API_URL}/pictures/`;
     let token = localStorage.token;
-
-    // const formData = new FormData();
-    // formData.append("photo_file", photoFile, photoFile.name);
-    // formData.append("description", description);
-    // formData.append("author.nickname", author);
-    // formData.append("category.title", category);
-    // for (let subcat of subcategory) {
-    //   formData.append("subcategory", subcat);
-    // }
 
     const formData = new FormData();
     formData.append("photo_file", formValue["photo_file"], formValue["photo_file"].name);
@@ -73,18 +64,6 @@ function PictureList(props) {
     
     return getPictureInfo();
   }
-
-  // const picturePropsList = Array.from({pictureList}.pictureList).map((picture) => {
-  //   console.log(picture.id)
-  //   return (
-  //     <li key={ picture.id }>
-  //       <a href={`/pictures/${picture.id}`}>
-  //         <img width="100" src={`${picture.photo_file}`} alt='Album element' />
-  //         <p>{ picture.url }</p>
-  //       </a>
-  //     </li>
-  //   )
-  // });
 
   const subcategoryInput = () => {
     if (formValue["category"]) {

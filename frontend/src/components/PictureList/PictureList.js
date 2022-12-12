@@ -10,6 +10,11 @@ const API_URL = 'http://127.0.0.1:9000/api/v1';
 
 function PictureList(props) {
   const [pictureList, setPictureList] = useState(0);
+  let [page, setPage] = useState(1);
+  let [buttonActivity, setButtonActivity] = useState({
+    'previous': false,
+    'next': false,
+  })
 
   const [formValue, setFormValue] = useState({
     'photo_file': undefined,
@@ -28,22 +33,30 @@ function PictureList(props) {
   // const [subcategory, setSubcategory] = useState([]);
   
   const getPictures = async () => {
-    const url = `${API_URL}/albums/${params.albumId}`;
-    let pictureList;
+    const url = `${API_URL}/albums/${params.albumId}?page=${ page }`;
     let token = localStorage.token;
+    let resData;
+
     await axios
       .get(url, {
         headers: {
-          'Authorization': `Bearer ${JSON.parse(token)}`,
+          'Authorization': `${JSON.parse(token)}`,
         }
       })
-      .then(response => pictureList = response.data.picture);
+      .then(response => resData = response.data.picture);
+    
+    let pictureList = resData.results;
 
-    let i = 0;
-    while (i <= pictureList.length - 1) {
-      pictureList[i].id = pictureList[i].url.split("/").slice(-2, -1)[0];
-      i++;
-    }
+    setButtonActivity({
+      previous: !!resData.previous,
+      next: !!resData.next,
+    })
+
+    // let i = 0;
+    // while (i <= pictureList.length - 1) {
+    //   pictureList[i].id = pictureList[i].url.split("/").slice(-2, -1)[0];
+    //   i++;
+    // }
     console.log(pictureList)
     return setPictureList(pictureList);
   };
@@ -51,6 +64,17 @@ function PictureList(props) {
   useEffect(() => {
     getPictures();
   }, [])
+
+  const nextPage = () => {
+    setPage(++page);
+    return getPictures();
+  };
+
+  const previousPage = () => {
+    setPage(--page);
+    return getPictures();
+  };
+
   
   const postEntry = async (e) => {
     e.preventDefault();
@@ -162,9 +186,19 @@ function PictureList(props) {
   // }
 
   return ( 
-      <div className="App">
-        <p>Список говна ({ picturePropsList.length })</p>
-        <ul>{ picturePropsList }</ul>
+      <div className="album-list">
+      { picturePropsList.length > 0
+        ? <div>
+          <p>Список говна ({ picturePropsList.length }) </p>
+          <div>
+            <input type='button' disabled={ !buttonActivity.previous } onClick={ previousPage } value='<' />
+            <p style={{ display: 'inline' }}>{ page }</p>
+            <input type='button' disabled={ !buttonActivity.next } onClick={ nextPage } value='>' />
+          </div>
+          <ul>{ picturePropsList }</ul>
+        </div>
+        : <p>Нет элементов</p>
+      }
         <button onClick={ getPictures }>Update</button>
         <form method='post'
           onSubmit={ postEntry }

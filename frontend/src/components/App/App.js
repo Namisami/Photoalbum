@@ -9,6 +9,16 @@ const API_URL = 'http://127.0.0.1:9000/api/v1';
 
 function App() {
   const [pictureList, setPictureList] = useState(0);
+  // const [page, setPage] = useState({
+  //   'first': 1,
+  //   "current": 1,
+  //   'last': 1,
+  // });
+  let [page, setPage] = useState(1);
+  let [buttonActivity, setButtonActivity] = useState({
+    'previous': false,
+    'next': false,
+  })
 
   const [formValue, setFormValue] = useState({
     'photo_file': undefined,
@@ -25,8 +35,8 @@ function App() {
   // const [subcategory, setSubcategory] = useState([]);
   
   const getPictures = async () => {
-    const url = `${API_URL}/pictures/`;
-    let pictureList;
+    const url = `${ API_URL }/pictures?page=${ page }`;
+    let resData;
     let token = localStorage.getItem('token');
     await axios
       .get(url, {
@@ -34,8 +44,15 @@ function App() {
           'Authorization': `${JSON.parse(token)}`,
         }
       })
-      .then(response => pictureList = response.data);
-    console.log(pictureList);
+      .then(response => resData = response.data);
+    
+    let pictureList = resData.results;
+
+    setButtonActivity({
+      previous: !!resData.previous,
+      next: !!resData.next,
+    })
+    
     return setPictureList(pictureList);
   };
     
@@ -72,13 +89,23 @@ function App() {
         headers: {
           // 'Accept': 'application/json',
           'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${JSON.parse(token)}`,
+          'Authorization': `${JSON.parse(token)}`,
         },
       })
       .then(res => console.log(res.data));
     
     return getPictures();
   }
+
+  const nextPage = () => {
+    setPage(++page);
+    return getPictures();
+  };
+
+  const previousPage = () => {
+    setPage(--page);
+    return getPictures();
+  };
 
   const picturePropsList = Array.from({pictureList}.pictureList).map((picture) => {
     return (
@@ -147,6 +174,11 @@ function App() {
   return ( 
       <div className="App">
         <p>Список говна</p>
+        <div>
+          <input type='button' disabled={ !buttonActivity.previous } onClick={ previousPage } value='<' />
+          <p style={{ display: 'inline' }}>{ page }</p>
+          <input type='button' disabled={ !buttonActivity.next } onClick={ nextPage } value='>' />
+        </div>
         <ul>{ picturePropsList }</ul>
         <button onClick={ getPictures }>Update</button>
         <form method='post'
