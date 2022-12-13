@@ -112,7 +112,7 @@ function PictureList(props) {
     return getPictures();
   }
 
-  const picturePropsList = Array.from({pictureList}.pictureList).map((picture) => {
+  const picturePropsList = Array.from(pictureList).map((picture) => {
     console.log(picture.id)
     return (
       <li key={ picture.id }>

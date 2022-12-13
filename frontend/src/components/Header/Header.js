@@ -15,6 +15,7 @@ import Registration from "../Registration/Registration";
 import Login from "../Login/Login";
 import Profile from "../Profile/Profile";
 import Logout from "../Logout/Logout";
+import Search from "../Search/Search";
 import './Header.css';
 
 
@@ -61,6 +62,9 @@ function Header() {
         <li>
           { handleAuthorization() }
         </li>
+        <li>
+          <Link to="/search/">Поиск</Link>
+        </li>
       </ul>
       <Routes>
         <Route path="/pictures/" element={ <App /> } />
@@ -71,6 +75,7 @@ function Header() {
         <Route path="/login/" element={ <Login onLogin={ authCheck } /> } />
         <Route path="/profile/" element={ <Profile /> } />
         <Route path="/logout/" element={ <Logout onLogout={ authCheck } /> } />
+        <Route path="/search/" element={ <Search /> } />
       </Routes>
     </div>
   )

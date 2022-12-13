@@ -176,10 +176,10 @@ class SubcategorySerializer(HyperlinkedModelSerializer):
         depth = 0
         # list_serializer_class = SubcategoryListSerializer
     
-    def validate(self, data):
-        print(data)
-        return data
+    # def validate(self, data):
+    #     print(data)
+    #     return data
 
-    def validate_title(self, value):
-        print(value)
-        return value
+    # def validate_title(self, value):
+    #     print(value)
+    #     return value

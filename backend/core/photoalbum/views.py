@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.filters import SearchFilter
 from django.core import serializers
 from django.shortcuts import get_object_or_404
 
@@ -19,11 +20,14 @@ class PictureViewSet(ModelViewSet):
     queryset = Picture.objects.all()
     serializer_class = PictureListSerializer
     permission_classes = (IsAuthenticated,)
+    search_fields = ['description']
+    filter_backends = (SearchFilter,)
     # pagination_class = StandardResultsSetPagination
 
     def list(self, request):
         user = User.objects.get(id=request.user.id)
         queryset = Picture.objects.filter(owner=user)
+        queryset = self.filter_queryset(queryset)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True, context={'request': request})
@@ -114,10 +118,13 @@ class AlbumViewSet(ModelViewSet):
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
     permission_classes = (IsAuthenticated,)
+    search_fields = ['title']
+    filter_backends = (SearchFilter,)
 
     def list(self, request):
         user = User.objects.get(id=request.user.id)
         queryset = Album.objects.filter(owner=user)
+        queryset = self.filter_queryset(queryset)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True, context={'request': request})
