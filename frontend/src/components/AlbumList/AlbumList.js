@@ -8,12 +8,38 @@ const API_URL = 'http://127.0.0.1:9000/api/v1';
 
 function AlbumList() {
   const [albumList, setAlbumList] = useState(0);
+
+  let [isFilled, setIsFilled] = useState(false);
   let [page, setPage] = useState(1);
   let [buttonActivity, setButtonActivity] = useState({
     'previous': false,
     'next': false,
   })
   
+  const getFilledAlbums = async () => {
+    const url = `${API_URL}/albums/filled_albums?page=${ page }`;
+    let token = localStorage.getItem('token');
+    let resData;
+
+    await axios
+      .get(url, {
+        headers: {
+          'Authorization': `${JSON.parse(token)}`,
+        }
+      })
+      .then(response => resData = response.data);
+    
+    let albumList = resData.results;
+
+    setButtonActivity({
+      previous: !!resData.previous,
+      next: !!resData.next,
+    })
+
+    setIsFilled(true);
+    return setAlbumList(albumList);
+  };
+
   const getAlbums = async () => {
     const url = `${API_URL}/albums?page=${ page }`;
     let token = localStorage.getItem('token');
@@ -33,6 +59,8 @@ function AlbumList() {
       previous: !!resData.previous,
       next: !!resData.next,
     })
+
+    setIsFilled(false);
     return setAlbumList(albumList);
   };
     
@@ -64,6 +92,10 @@ function AlbumList() {
 
   return ( 
       <div className="album-list">
+      { isFilled
+        ? <button onClick={ getAlbums }>Показывать все</button>
+        : <button onClick={ getFilledAlbums }>Не показывать пустые</button>
+      }
       { albumPropsList.length > 0
         ? <div>
           <p>Список говна ({ albumPropsList.length }) </p>

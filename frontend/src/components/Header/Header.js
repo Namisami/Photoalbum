@@ -28,7 +28,6 @@ function Header() {
 
   const authCheck = () => {
     const user = localStorage.getItem('user')
-    console.log(user);
     setUserData(JSON.parse(user));
   };
 

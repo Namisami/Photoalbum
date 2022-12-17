@@ -5,6 +5,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.filters import SearchFilter
 from django.core import serializers
+from django.db.models import Q, Count, Sum
 from django.shortcuts import get_object_or_404
 
 from rest_framework_simplejwt.tokens import AccessToken
@@ -120,6 +121,17 @@ class AlbumViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     search_fields = ['title']
     filter_backends = (SearchFilter,)
+
+    @action(detail=False, methods=['get'])
+    def filled_albums(self, request):
+        user = User.objects.get(id=request.user.id)
+        filled = Album.objects.filter(Q(owner=user) & Q(picture__isnull=False)).distinct()
+        print(filled)
+        queryset = self.filter_queryset(filled)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={'request': request})
+        return self.get_paginated_response(serializer.data)
 
     def list(self, request):
         user = User.objects.get(id=request.user.id)

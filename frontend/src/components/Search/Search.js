@@ -76,7 +76,7 @@ function Search() {
   const albumPropsList = Array.from(searchResult.albums).map((album) => {
     return (
       <li key={album.id}>
-        <Link to={ `${album.id}` }>
+        <Link to={ `/albums/${album.id}` }>
           <img width="100" src={`${album.cover}`} alt='Album element' />
           <p>{album.url}</p>
         </Link>
@@ -87,7 +87,7 @@ function Search() {
   const picturePropsList = Array.from(searchResult.pictures).map((picture) => {
     return (
       <li key={picture.id}>
-        <Link to={ `${picture.id}` }>
+        <Link to={ `/pictures/${picture.id}` }>
           <img width="100" src={`${picture.photo_file}`} alt='Picture element' />
           <p>{picture.url}</p>
         </Link>

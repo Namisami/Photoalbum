@@ -11,18 +11,22 @@ const API_URL_AVATAR = 'http://127.0.0.1:9000';
 
 function Profile(props) {
   const [formValue, setFormValue] = useState({
-    'email': '',
-    'password': '',
+    'photo': '',
+    'bio': '',
   });
 
-  const [user, setUser] = useState({})
-  // const [token, setToken] = useState(0)
+  const [user, setUser] = useState({});
+  const [isEdit, setIsEdit] = useState(false);
+
+  useEffect(() => {
+    getUser();
+  }, [])
 
   const getUser = async () => {
     const url = `${API_URL}/users/`;
+    const token = localStorage.token;
 
     let userData;
-    let token = localStorage.getItem('token');
 
     await axios
       .get(url, {
@@ -31,67 +35,103 @@ function Profile(props) {
         },
       })
       .then(res => userData = res.data);
-    console.log(userData);
+    console.log(userData)
+    // userData = JSON.parse(userData)
+    // localStorage.setItem('user', JSON.stringify(userData))
     setUser(userData);
   }
 
-  useEffect(() => {
-    // setToken(JSON.parse(localStorage.getItem('token')));
-    getUser();
-  }, [])
-
+  const editProfile = async (e) => {
+    e.preventDefault();
+  }
   
   const postEntry = async (e) => {
     e.preventDefault();
-    const url = `${API_URL}/auth/login/`;
+    const url = `${API_URL}/users/${ user.id }/`;
+    const token = localStorage.token;
 
     const formData = new FormData();
-    formData.append("email", formValue["email"]);
-    formData.append("password", formValue["password"]);
+    // if (photo) {
+    //   formData.append("photo", formValue["photo"]);
+    // }
+    // if (bio)
+    for (let key in formValue) {
+      if (key) {
+        formData.append(key, formValue[key]);
+      }
+    }
+    // formData.append("password", formValue["password"]);
 
     let userData;
     
     await axios
-      .post(url, formData, {
+      .patch(url, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `${JSON.parse(token)}`,
         },
       })
-      .then(res => userData = res.data.user);
+      .then(res => userData = res.data);
     
     console.log(userData);
-    return localStorage.setItem('user', userData);
+    return setUser(userData);
   }
 
+  const handleEditClick = () => {
+    setIsEdit(true);
+  }
+
+  // const handleFormValueChange = (e) => {
+  //   if (e.target.name == 'subcategory') {
+  //     let newSubcategory = [];
+  //     for (let value of e.target.value.split(" ")) {
+  //       newSubcategory.push(value)
+  //     }
+  //     setFormValue({ ...formValue, [e.target.name]: newSubcategory });
+  //   } else if (e.target.name == 'photo_file') {
+  //     setFormValue({ ...formValue, [e.target.name]: e.target.files[0] })
+  //   } else {
+  //     setFormValue({ ...formValue, [e.target.name]: e.target.value });
+  //   }
+  // }
   const handleFormValueChange = (e) => {
-    setFormValue({ ...formValue, [e.target.name]: e.target.value });
+    if (e.target.name == 'photo') {
+      setFormValue({ ...formValue, [e.target.name]: e.target.files[0] })
+    } else {
+      setFormValue({ ...formValue, [e.target.name]: e.target.value });
+    }
   }
 
   return ( 
       <div className="form">
         <img src={`${ user.photo }`} width='500' alt='User avatar'></img>
         <p>{ user.first_name } { user.last_name }</p>
-        <form method='post'
-          onSubmit={ postEntry }
-        >
-          <FormInput 
-            name='email' 
-            type='email' 
-            title='Email' 
-            onChangeValue={ handleFormValueChange } 
-          />
-          <br />
-          <FormInput 
-            name='password' 
-            title='Пароль' 
-            onChangeValue={ handleFormValueChange } 
-          />
-          <br />
-          <button
-            type='submit'>
-              Отправить
-          </button>
-        </form>
+        <p>{ user.email }</p>
+        <p>{ user.bio }</p>
+        <button onClick={ handleEditClick }>Изменить данные</button>
+        { isEdit &&
+          <form method='patch'
+            onSubmit={ postEntry }
+          >
+            <FormInput 
+              name='photo' 
+              type='file' 
+              title='Аватарка' 
+              onChangeValue={ handleFormValueChange } 
+            />
+            <br />
+            <FormInput 
+              name='bio' 
+              title='О себе' 
+              onChangeValue={ handleFormValueChange } 
+            />
+            <br />
+            <button
+              type='submit'>
+                Отправить
+            </button>
+          </form>
+        }
       </div>
   );
 }

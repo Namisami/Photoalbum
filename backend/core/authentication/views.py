@@ -88,7 +88,7 @@ class RefreshViewSet(ViewSet):
 
 
 class UserViewSet(ModelViewSet):
-    http_method_names = ['get']
+    # http_method_names = ['get']
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
@@ -97,11 +97,32 @@ class UserViewSet(ModelViewSet):
     # ordering = ['-updated']
 
     def list(self, request):
-        print(request.user)
         queryset = User.objects.get(id=request.user.id)
         serializer = UserSerializer(queryset, context={'request': request})
-        print(serializer.data)
         return Response(serializer.data)
+
+    # def patch(self, request, *args, **kwargs):
+    #     # queryset = User.objects.get(id=request.user.id)
+    #     serializer = UserSerializer(data=request.DATA, context={'request': request})
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(status=status.HTTP_205_RESET_CONTENT)
+    #     else:
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, pk=None):
+        instance = User.objects.get(id=request.user.id)
+        serializer = self.get_serializer(
+            instance,
+            data=request.data, 
+            context={'request': request}, 
+            partial=True
+        )
+        print(serializer)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+    #     return self.partial_update(request, *args, **kwargs)       
 
     def get_queryset(self):
         if self.request.user.is_superuser:
