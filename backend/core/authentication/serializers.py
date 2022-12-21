@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, ValidationError
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.settings import api_settings
@@ -14,14 +14,25 @@ class UserSerializer(ModelSerializer):
         fields = ['id', 'last_login', 'first_name', 'last_name', 'email', 'photo', 'bio', 'is_active', 'is_staff', 'is_superuser']
         read_only_field = ['is_active', 'is_staff', 'is_superuser']
 
-
-class LoginSerializer(UserSerializer):
+class LoginSerializer(ModelSerializer):
     password = serializers.CharField(max_length=128, min_length=8, write_only=True, required=True)
     email = serializers.EmailField(required=True, write_only=True, max_length=128)
     
     class Meta:
         model = User
         fields = ['id', 'email', 'password']
+
+
+class PasswordSerializer(UserSerializer):
+    old_password = serializers.CharField(max_length=128, min_length=8, write_only=True, required=True)
+    password = serializers.CharField(max_length=128, min_length=8, write_only=True, required=True)
+    password_again = serializers.CharField(max_length=128, min_length=8, write_only=True, required=True)
+    
+    class Meta:
+        model = User
+        fields = ['id', 'old_password', 'password', 'password_again']
+
+    
 
     # def validate(self, attrs):
     #     data = super().validate(attrs)
@@ -49,6 +60,14 @@ class RegistrationSerializer(UserSerializer):
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'email', 'password']
+
+    def validate_first_name(self, value):
+        if len(value) < 2:
+            raise ValidationError("Слишком короткое имя", code='invalid')
+
+    def validate_last_name(self, value):
+        if len(value) < 2:
+            raise ValidationError("Слишком короткая фамилия", code='invalid')
 
     def create(self, validated_data):
         try:

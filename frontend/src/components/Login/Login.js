@@ -33,20 +33,19 @@ function Login(props) {
       .then(res => resData = res.data);
       
     let token = `Token ${resData.token}`;
-    console.log(token )
 
-    const useurl = `${API_URL}/users/`;
-    await axios
-      .get(useurl, {
-        headers: {
-          'Authorization': token,
-        },
-      })
-      .then(res => resData = res.data);
-    let userData = resData.user;
-    console.log(resData);
+    // const useurl = `${API_URL}/users/`;
+    // await axios
+    //   .get(useurl, {
+    //     headers: {
+    //       'Authorization': token,
+    //     },
+    //   })
+    //   .then(res => resData = res.data);
+    // let userData = resData.user;
+    // console.log(resData);
     
-    localStorage.setItem('user', JSON.stringify(userData));
+    // localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('token', JSON.stringify(token));
     return props.onLogin();
   }

@@ -1,19 +1,15 @@
-from .serializers import UserSerializer, LoginSerializer, RegistrationSerializer
+from .serializers import UserSerializer, LoginSerializer, RegistrationSerializer, PasswordSerializer
 from .models import User
 
-from django.core import serializers
-from django.forms.models import model_to_dict
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import filters, status
+from rest_framework.decorators import action
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
-import json
-
 
 
 class LoginViewSet(ViewSet):
@@ -61,7 +57,8 @@ class RegistrationViewSet(ModelViewSet):
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if serializer.is_valid() == False:
+            return Response(serializer.errors)
         user = serializer.save()
         token, _ = Token.objects.get_or_create(user=user)
 
@@ -71,20 +68,20 @@ class RegistrationViewSet(ModelViewSet):
         }, status=status.HTTP_201_CREATED)
 
 
-class RefreshViewSet(ViewSet):
-    permission_classes = (AllowAny,)
-    authentication_classes = (TokenAuthentication,)
-    http_method_names = ['post']
+# class RefreshViewSet(ViewSet):
+#     permission_classes = (AllowAny,)
+#     authentication_classes = (TokenAuthentication,)
+#     http_method_names = ['post']
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+#     def create(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
 
-        # try:
-        serializer.is_valid(raise_exception=True)
-        # except TokenError as e:
-        #     raise InvalidToken(e.args[0])
+#         # try:
+#         serializer.is_valid(raise_exception=True)
+#         # except TokenError as e:
+#         #     raise InvalidToken(e.args[0])
 
-        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+#         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
 class UserViewSet(ModelViewSet):
@@ -101,15 +98,6 @@ class UserViewSet(ModelViewSet):
         serializer = UserSerializer(queryset, context={'request': request})
         return Response(serializer.data)
 
-    # def patch(self, request, *args, **kwargs):
-    #     # queryset = User.objects.get(id=request.user.id)
-    #     serializer = UserSerializer(data=request.DATA, context={'request': request})
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(status=status.HTTP_205_RESET_CONTENT)
-    #     else:
-    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     def partial_update(self, request, pk=None):
         instance = User.objects.get(id=request.user.id)
         serializer = self.get_serializer(
@@ -118,11 +106,29 @@ class UserViewSet(ModelViewSet):
             context={'request': request}, 
             partial=True
         )
-        print(serializer)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
     #     return self.partial_update(request, *args, **kwargs)       
+
+    @action(detail=True, methods=['post'])
+    def set_password(self, request, pk=None):
+        user = User.objects.get(id=request.user.id)
+        serializer = PasswordSerializer(data=request.data)
+        serializer.is_valid()
+        if not request.user.check_password(request.data.get('old_password')):
+            return Response({"password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+
+        if serializer.validated_data["password"] != serializer.validated_data["password_again"]:
+            return Response({'password': 'Пароли не совпали'})
+
+        if serializer.is_valid():
+            user.set_password(serializer.validated_data['password'])
+            user.save()
+            return Response({'status': 'password set'})
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
 
     def get_queryset(self):
         if self.request.user.is_superuser:

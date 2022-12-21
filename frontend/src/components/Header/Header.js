@@ -20,19 +20,24 @@ import './Header.css';
 
 
 function Header() {
-  const [userData, setUserData] = useState({})
+  const [isLogin, setIsLogin] = useState(false);
 
   useEffect(() => {
     authCheck();
   }, []);
 
   const authCheck = () => {
-    const user = localStorage.getItem('user')
-    setUserData(JSON.parse(user));
+    // const user = localStorage.getItem('user')
+    // setUserData(JSON.parse(user));
+    if (localStorage.getItem('token')) {
+      setIsLogin(true);
+    } else {
+      setIsLogin(false);
+    }
   };
 
-  const handleAuthorization = (e) => {
-    if (localStorage.getItem('token')) {
+  const handleAuthorization = () => {
+    if (isLogin) {
       return (
         <div>
           <Link to="/profile/">Профиль</Link>
