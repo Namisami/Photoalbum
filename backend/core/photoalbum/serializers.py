@@ -37,10 +37,10 @@ class PictureListSerializer(HyperlinkedModelSerializer):
     # category = CategorySerializer()
     # subcategory = SubcategorySerializer(many=True)
     owner = UserSerializer
+
     
     class Meta:
         model = Picture
-        # fields = '__all__'
         fields = ['url', 'id', 'photo_file', 'description', 'upload_date', 
                 'author', 'category', 'subcategory', 'owner']
         # depth = 1
@@ -124,7 +124,7 @@ class AlbumSerializer(HyperlinkedModelSerializer):
     class Meta:
         model = Album
         fields = ['url', 'id', 'title', 'description', 'cover', 'created_at', 'picture', 'owner']
-        depth = 1
+        # depth = 1
 
     def paginated_picture(self, obj):
             page_size = self.context['request'].query_params.get('size') or 9
@@ -173,7 +173,7 @@ class SubcategorySerializer(HyperlinkedModelSerializer):
     class Meta:
         model = Subcategory
         fields = '__all__'
-        depth = 0
+        # depth = 0
         # list_serializer_class = SubcategoryListSerializer
     
     # def validate(self, data):

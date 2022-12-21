@@ -3,10 +3,13 @@ from django.urls import reverse
 from django.db import models
 from django.utils.http import urlencode
 from django.utils.html import format_html
+
 from import_export.admin import ExportMixin
+from simple_history.admin import SimpleHistoryAdmin
 
 from .models import Album, Author, Picture, Category, Subcategory
 from .resources import AlbumResource, AuthorResource, PictureResource, CategoryResource, SubcategoryResource
+from .history import HistoryChanges
 
 
 def custom_titled_filter(title):
@@ -19,7 +22,7 @@ def custom_titled_filter(title):
 
 
 @admin.register(Album)
-class AlbumAdmin(ExportMixin, admin.ModelAdmin):
+class AlbumAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
     list_display = ('title', 'cover_view', 'picture_view', 'owner_view')
     # ordering = ('picture',)
     list_filter = ('owner',)
@@ -51,7 +54,7 @@ class AlbumAdmin(ExportMixin, admin.ModelAdmin):
     owner_view.short_description = 'Владелец'
 
 @admin.register(Author)
-class AuthorAdmin(ExportMixin, admin.ModelAdmin):
+class AuthorAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
     list_display = ('nickname', 'bio_view', 'picture_view')
     search_fields = ('nickname',)
     resource_classes = [AuthorResource]
@@ -79,7 +82,7 @@ class AuthorAdmin(ExportMixin, admin.ModelAdmin):
     picture_view.short_description = "Изображения"
 
 @admin.register(Picture)
-class PictureAdmin(ExportMixin, admin.ModelAdmin):
+class PictureAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
     list_display = ('photo_view', 'description_view', 'author_view', 'category_view', 'owner_view')
     list_filter = (
         'owner', 
@@ -135,7 +138,7 @@ class PictureAdmin(ExportMixin, admin.ModelAdmin):
     owner_view.short_description = 'Владелец'
 
 @admin.register(Category)
-class CategoryAdmin(ExportMixin, admin.ModelAdmin):
+class CategoryAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
     list_display = ("title", "description_view", 'picture_view', 'subcategory_view', "owner_view")
     list_filter = ("owner",)
     search_fields = ("title", "description")
@@ -182,7 +185,7 @@ class CategoryAdmin(ExportMixin, admin.ModelAdmin):
     owner_view.short_description = "Владелец"
 
 @admin.register(Subcategory)
-class SubcategoryAdmin(ExportMixin, admin.ModelAdmin):
+class SubcategoryAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
     list_display = ('title', 'description_view', 'category_view', 'owner_view')
     list_filter = (
         ('category__title', custom_titled_filter('Категория')),
