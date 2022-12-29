@@ -44,8 +44,9 @@ function Registration(props) {
   }
 
   return ( 
-      <div className="form">
+      <div className="container">
         <form method='post'
+          className='my-5'
           onSubmit={ postEntry }
         >
           <FormInput 
@@ -74,6 +75,7 @@ function Registration(props) {
           />
           <br />
           <button
+            className='btn btn-primary'
             type='submit'>
               Отправить
           </button>

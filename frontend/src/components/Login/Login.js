@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import FormInput from '../FormInput/FormInput';
 import './Login.css';
 import axios from 'axios';
@@ -33,19 +33,6 @@ function Login(props) {
       .then(res => resData = res.data);
       
     let token = `Token ${resData.token}`;
-
-    // const useurl = `${API_URL}/users/`;
-    // await axios
-    //   .get(useurl, {
-    //     headers: {
-    //       'Authorization': token,
-    //     },
-    //   })
-    //   .then(res => resData = res.data);
-    // let userData = resData.user;
-    // console.log(resData);
-    
-    // localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('token', JSON.stringify(token));
     return props.onLogin();
   }
@@ -55,8 +42,9 @@ function Login(props) {
   }
 
   return ( 
-      <div className="form">
+      <div className="container">
         <form method='post'
+          className='my-5'
           onSubmit={ postEntry }
         >
           <FormInput 
@@ -74,6 +62,7 @@ function Login(props) {
           />
           <br />
           <button
+            className='btn btn-primary'
             type='submit'>
               Отправить
           </button>

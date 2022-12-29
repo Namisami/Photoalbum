@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import FormInput from '../FormInput/FormInput';
 import './App.css';
 import axios from 'axios';
@@ -9,16 +10,11 @@ const API_URL = 'http://127.0.0.1:9000/api/v1';
 
 function App() {
   const [pictureList, setPictureList] = useState(0);
-  // const [page, setPage] = useState({
-  //   'first': 1,
-  //   "current": 1,
-  //   'last': 1,
-  // });
   let [page, setPage] = useState(1);
   let [buttonActivity, setButtonActivity] = useState({
     'previous': false,
     'next': false,
-  })
+  });
 
   const [formValue, setFormValue] = useState({
     'photo_file': undefined,
@@ -36,8 +32,8 @@ function App() {
   
   const getPictures = async () => {
     const url = `${ API_URL }/pictures?page=${ page }`;
-    let resData;
     let token = localStorage.getItem('token');
+    let resData;
     await axios
       .get(url, {
         headers: {
@@ -63,15 +59,7 @@ function App() {
   const postEntry = async (e) => {
     e.preventDefault();
     const url = `${API_URL}/pictures/`;
-
-    // const formData = new FormData();
-    // formData.append("photo_file", photoFile, photoFile.name);
-    // formData.append("description", description);
-    // formData.append("author.nickname", author);
-    // formData.append("category.title", category);
-    // for (let subcat of subcategory) {
-    //   formData.append("subcategory", subcat);
-    // }
+    let token = localStorage.getItem('token');
 
     const formData = new FormData();
     formData.append("photo_file", formValue["photo_file"], formValue["photo_file"].name);
@@ -81,13 +69,10 @@ function App() {
     for (let subcat of formValue["subcategory"]) {
       formData.append("subcategory", subcat);
     }
-
-    let token = localStorage.getItem('token');
     
     await axios
       .post(url, formData, {
         headers: {
-          // 'Accept': 'application/json',
           'Content-Type': 'multipart/form-data',
           'Authorization': `${JSON.parse(token)}`,
         },
@@ -109,12 +94,11 @@ function App() {
 
   const picturePropsList = Array.from({pictureList}.pictureList).map((picture) => {
     return (
-      <li key={picture.id}>
-        <a href={picture.id}>
-          <img width="100" src={`${picture.photo_file}`} alt='Album element' />
-          <p>{picture.url}</p>
-        </a>
-      </li>
+      <div className='col' key={picture.id}>      
+        <Link className='card shadow' to={`/pictures/${picture.id}`}>
+          <img className='card-img-top object-fit-cover rounded' height="300" src={`${picture.photo_file}`} alt='Album element' />
+        </Link>
+      </div>
     )
   });
 
@@ -146,111 +130,69 @@ function App() {
     }
   }
 
-  // const handleAuthorChange = (e) => {
-  //   setAuthor(e.target.value);
-  // }
-
-  // const handleCategoryChange = async(e) => {
-  //   setCategory(e.target.value);
-  // }
-
-  // const handleDescriptionChange = (e) => {
-  //   setDescription(e.target.value);
-  // }
-
-  // const handleSubcategoryChange = (e) => {
-  //   let newSubcategory = [];
-  //   for (let value of e.target.value.split(" ")) {
-  //     newSubcategory.push(value)
-  //   }
-  //   console.log(newSubcategory);
-  //   setSubcategory(newSubcategory);
-  // }
-  
-  // const handlePhotoFileChange = (e) => {
-  //   setPhotoFile(e.target.files[0]);
-  // }
-
   return ( 
-      <div className="App">
-        <p>Список говна</p>
-        <div>
-          <input type='button' disabled={ !buttonActivity.previous } onClick={ previousPage } value='<' />
-          <p style={{ display: 'inline' }}>{ page }</p>
-          <input type='button' disabled={ !buttonActivity.next } onClick={ nextPage } value='>' />
+      <div className="container">
+        <div className='mb-5 mt-2'>
+          <h1 className='text-center'>Изображения</h1>
+          <div className='d-flex justify-content-end my-2'>
+            <div className='pagination d-flex my-auto'>
+              <div 
+                className={ buttonActivity.previous
+                  ? 'page-item'
+                  : 'page-item disabled'
+                }
+              >
+                <input type='button' className='page-link' disabled={ !buttonActivity.previous } onClick={ previousPage } value={'<'}></input>
+              </div>
+              <div className='page-item'>
+                <p className='page-link m-0'>{ page }</p>
+              </div>
+              <div
+                className={ buttonActivity.next
+                  ? 'page-item'
+                  : 'page-item disabled'
+                }
+              >
+                <input type='button' className='page-link' disabled={ !buttonActivity.next } onClick={ nextPage } value={'>'}></input>
+              </div> 
+            </div>
+          </div>
+          <div className='row row-cols-3 g-3'>
+            { picturePropsList }
+          </div>
+          <form method='post'
+            className='my-3'
+            onSubmit={ postEntry }
+          >
+            <FormInput 
+              name='photo_file' 
+              type='file' 
+              title='Изображение' 
+              onChangeValue={ handleFormValueChange } 
+            />
+            <FormInput 
+              name='description' 
+              title='Описание' 
+              onChangeValue={ handleFormValueChange } 
+            />
+            <FormInput 
+              name='author' 
+              title='Автор' 
+              onChangeValue={ handleFormValueChange } 
+            />
+            <FormInput 
+              name='category' 
+              title='Категория' 
+              onChangeValue={ handleFormValueChange } 
+            />
+            { subcategoryInput() }
+            <button
+              className='btn btn-primary'
+              type='submit'>
+                Отправить
+            </button>
+          </form>
         </div>
-        <ul>{ picturePropsList }</ul>
-        <button onClick={ getPictures }>Update</button>
-        <form method='post'
-          onSubmit={ postEntry }
-        >
-          {/* <label>
-            Изображение <br />
-            <input
-              name='photo_file'
-              id="photoFile" 
-              type='file'
-              accept='image/jpeg,image/png,image/jpg'
-              onChange={ handlePhotoFileChange }
-            />
-          </label> */}
-          <FormInput 
-            name='photo_file' 
-            type='file' 
-            title='Изображение' 
-            onChangeValue={ handleFormValueChange } 
-            // onChange={ handlePhotoFileChange }
-          />
-          <br />
-          {/* <label>
-            Описание <br />
-            <input
-              name='description'
-              id="description"
-              onChange={ handleDescriptionChange }
-            />
-          </label> */}
-          <FormInput 
-            name='description' 
-            title='Описание' 
-            onChangeValue={ handleFormValueChange } 
-          />
-          <br />
-          {/* <label>
-            Автор <br />
-            <input
-              name='author'
-              id="author" 
-              onChange={ handleAuthorChange }
-            />
-          </label> */}
-          <FormInput 
-            name='author' 
-            title='Автор' 
-            onChangeValue={ handleFormValueChange } 
-          />
-          <br />
-          {/* <label>
-            Категория <br />
-            <input
-              name='category'
-              id="category" 
-              onChange={ handleCategoryChange }
-            />
-          </label> */}
-          <FormInput 
-            name='category' 
-            title='Категория' 
-            onChangeValue={ handleFormValueChange } 
-          />
-          <br />
-          { subcategoryInput() }
-          <br />
-          <button
-            type='submit'>
-              Отправить
-          </button>
-        </form>
       </div>
   );
 }

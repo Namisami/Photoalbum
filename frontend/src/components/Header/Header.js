@@ -39,37 +39,37 @@ function Header() {
   const handleAuthorization = () => {
     if (isLogin) {
       return (
-        <div>
-          <Link to="/profile/">Профиль</Link>
-          <Link to="/logout/">Выйти</Link>
+        <div className="col-3 text-end">
+          <Link className="btn btn-outline-light mx-3" to="/profile/">Профиль</Link>
+          <Link className="btn btn-warning" to="/logout/">Выйти</Link>
         </div>
       )
     } else {
       return (
-        <div>
-          <Link to="/signup/">Регистрация</Link>
-          <Link to="/login/">Войти</Link>
+        <div className="col-3 text-end">
+          <Link className="btn btn-outline-light mx-3" to="/signup/">Регистрация</Link>
+          <Link className="btn btn-warning" to="/login/">Войти</Link>
         </div>
       )
     }
   }
 
   return (
-    <div>
-      <ul>
-        <li>
-          <Link to="/pictures/">Картинки</Link>
-        </li>
-        <li>
-          <Link to="/albums/">Альбомы</Link>
-        </li>
-        <li>
-          { handleAuthorization() }
-        </li>
-        <li>
-          <Link to="/search/">Поиск</Link>
-        </li>
-      </ul>
+    <div className="d-flex flex-column">
+      <header className="d-flex px-5 align-items-center justify-content-between text-bg-dark py-3">
+        <ul className="nav col-9 justify-self-center">
+          <li key={ 1 }>
+            <Link className="nav-link text-white" to="/pictures/">Картинки</Link>
+          </li>
+          <li key={ 2 }>
+            <Link className="nav-link text-white" to="/albums/">Альбомы</Link>
+          </li>
+          <li key={ 3 }>
+            <Link className="nav-link text-white" to="/search/">Поиск</Link>
+          </li>
+        </ul>
+        { handleAuthorization() }
+      </header>
       <Routes>
         <Route path="/pictures/" element={ <App /> } />
         <Route path="/pictures/:pictureId" element={ <PictureElement /> } />

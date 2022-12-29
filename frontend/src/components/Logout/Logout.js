@@ -15,8 +15,8 @@ function Logout(props) {
   });
 
   return ( 
-      <div>
-        <p>Вы успешно вышли из аккаунта</p>
+      <div className='container'>
+        <h1 className='text-center my-5'>Вы успешно вышли из аккаунта</h1>
       </div>
   );
 }

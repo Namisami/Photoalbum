@@ -67,7 +67,7 @@ class Picture(models.Model):
 
 class Album(models.Model):
     title = models.CharField(verbose_name="Название", max_length=255, default="Новый альбом")
-    description = models.TextField(verbose_name="Описание", blank=True)
+    description = models.TextField(verbose_name="Описание", blank=True, null=True)
     created_at = models.DateField(verbose_name="Дата создания", auto_now_add=True)
     cover = models.ImageField(verbose_name="Обложка", upload_to="albums/covers", default="../static/images/placeholder.webp")
     picture = models.ManyToManyField(verbose_name="Изображения", to=Picture, blank=True)

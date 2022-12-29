@@ -54,16 +54,12 @@ function Profile(props) {
     const token = localStorage.token;
 
     const formData = new FormData();
-    // if (photo) {
-    //   formData.append("photo", formValue["photo"]);
-    // }
-    // if (bio)
+    
     for (let key in formValue) {
       if (key) {
         formData.append(key, formValue[key]);
       }
     }
-    // formData.append("password", formValue["password"]);
 
     let userData;
     
@@ -107,10 +103,16 @@ function Profile(props) {
   }
 
   const handleEditClick = () => {
+    if (passwordIsEdit) {
+      setPasswordIsEdit(!passwordIsEdit);
+    }
     setIsEdit(!isEdit);
   }
 
   const handlePasswordEditClick = () => {
+    if (isEdit) {
+      setIsEdit(!isEdit);
+    }
     setPasswordIsEdit(!passwordIsEdit);
   }
 
@@ -140,77 +142,86 @@ function Profile(props) {
   }
 
   return ( 
-      <div className="form">
-        <img src={`${ user.photo }`} width='500' alt='User avatar'></img>
-        <p>{ user.first_name } { user.last_name }</p>
-        <p>{ user.email }</p>
-        <p>{ user.bio }</p>
-        <button onClick={ handleEditClick }>
-          { !isEdit
-            ? 'Изменить данные'
-            : 'Скрыть'
-          }
-        </button>
-        <button onClick={ handlePasswordEditClick }>
-        { !passwordIsEdit
-            ? 'Изменить пароль'
-            : 'Скрыть'
-          }
-        </button>
-        { passwordIsEdit &&
-          <form method='post'
-            onSubmit={ changePassword }
-          >
-            <FormInput 
-              name='old_password' 
-              type='password' 
-              title='Старый пароль' 
-              onChangeValue={ handlePasswordFormValueChange } 
-            />
-            <br />
-            <FormInput 
-              name='password' 
-              type='password'
-              title='Новый пароль' 
-              onChangeValue={ handlePasswordFormValueChange } 
-            />
-            <br />
-            <FormInput 
-              name='password_again' 
-              type='password'
-              title='Новый пароль (повторите)' 
-              onChangeValue={ handlePasswordFormValueChange } 
-            />
-            <br />
-            <button
-              type='submit'>
-                Отправить
+      <div className="container d-flex justify-content-center">
+        <div className='w-50 my-5'>
+          <div className='card shadow'>
+            <img className='card-img-top' src={`${ user.photo }`} alt='User avatar'></img>
+            <div className='card-body'>
+              <p className='card-text m-1 alert alert-primary'>{ user.first_name } { user.last_name }</p>
+              <p className='card-text m-1 alert alert-light'>{ user.bio }</p>
+            </div>
+          </div>
+          <div className='d-flex justify-content-around my-2'>
+            <button className='btn btn-primary' onClick={ handleEditClick }>
+              { !isEdit
+                ? 'Изменить данные'
+                : 'Скрыть'
+              }
             </button>
-          </form>
-        }
-        { isEdit &&
-          <form method='patch'
-            onSubmit={ postEntry }
-          >
-            <FormInput 
-              name='photo' 
-              type='file' 
-              title='Аватарка' 
-              onChangeValue={ handleFormValueChange } 
-            />
-            <br />
-            <FormInput 
-              name='bio' 
-              title='О себе' 
-              onChangeValue={ handleFormValueChange } 
-            />
-            <br />
-            <button
-              type='submit'>
-                Отправить
+            <button className='btn btn-primary' onClick={ handlePasswordEditClick }>
+            { !passwordIsEdit
+                ? 'Изменить пароль'
+                : 'Скрыть'
+              }
             </button>
-          </form>
-        }
+          </div>
+          { passwordIsEdit &&
+            <form method='post'
+              onSubmit={ changePassword }
+            >
+              <FormInput 
+                name='old_password' 
+                type='password' 
+                title='Старый пароль' 
+                onChangeValue={ handlePasswordFormValueChange } 
+              />
+              <br />
+              <FormInput 
+                name='password' 
+                type='password'
+                title='Новый пароль' 
+                onChangeValue={ handlePasswordFormValueChange } 
+              />
+              <br />
+              <FormInput 
+                name='password_again' 
+                type='password'
+                title='Новый пароль (повторите)' 
+                onChangeValue={ handlePasswordFormValueChange } 
+              />
+              <br />
+              <button
+                className='btn btn-primary w-100'
+                type='submit'>
+                  Отправить
+              </button>
+            </form>
+          }
+          { isEdit &&
+            <form method='patch'
+              onSubmit={ postEntry }
+            >
+              <FormInput 
+                name='photo' 
+                type='file' 
+                title='Аватарка' 
+                onChangeValue={ handleFormValueChange } 
+              />
+              <br />
+              <FormInput 
+                name='bio' 
+                title='О себе' 
+                onChangeValue={ handleFormValueChange } 
+              />
+              <br />
+              <button
+                className='btn btn-primary w-100'
+                type='submit'>
+                  Отправить
+              </button>
+            </form>
+          }
+        </div>
       </div>
   );
 }

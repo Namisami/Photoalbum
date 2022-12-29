@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './Search.css';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import FormInput from '../FormInput/FormInput';
 
 const API_URL = 'http://127.0.0.1:9000/api/v1';
 
@@ -11,18 +12,17 @@ function Search() {
     'albums': [],
     'pictures': [],
   });
-  let [searchQuery, setSearchQuery] = useState('');
   let [page, setPage] = useState(1);
   let [buttonActivity, setButtonActivity] = useState({
     'previous': false,
     'next': false,
   });
   
-  const getSearchResult = async () => {
+  const getSearchResult = async (query='') => {
     let token = localStorage.getItem('token');
     let resData;
     
-    const albumsUrl = `${API_URL}/albums?search=${ searchQuery }`;
+    const albumsUrl = `${API_URL}/albums?search=${ query }&page=${ page }`;
     await axios
       .get(albumsUrl, {
         headers: {
@@ -33,16 +33,16 @@ function Search() {
 
     let albumList = resData.results;
 
-    const picturesUrl = `${API_URL}/pictures?search=${ searchQuery }`;
-    await axios
-      .get(picturesUrl, {
-        headers: {
-          'Authorization': `${JSON.parse(token)}`,
-        }
-      })
-      .then(response => resData = response.data);
+    // const picturesUrl = `${API_URL}/pictures?search=${ searchQuery }`;
+    // await axios
+    //   .get(picturesUrl, {
+    //     headers: {
+    //       'Authorization': `${JSON.parse(token)}`,
+    //     }
+    //   })
+    //   .then(response => resData = response.data);
     
-    let pictureList = resData.results;
+    // let pictureList = resData.results;
 
     setButtonActivity({
       previous: !!resData.previous,
@@ -50,13 +50,13 @@ function Search() {
     })
     return setSearchResult({
       albums: albumList,
-      pictures: pictureList,
+      // pictures: pictureList,
     });
   };
     
-  // useEffect(() => {
-  //   getSearchResult();
-  // }, [])
+  useEffect(() => {
+    getSearchResult();
+  }, [])
 
   const nextPage = () => {
     setPage(++page);
@@ -69,59 +69,88 @@ function Search() {
   };
   
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-    getSearchResult();
+    getSearchResult(e.target.value);
   }
 
   const albumPropsList = Array.from(searchResult.albums).map((album) => {
     return (
-      <li key={album.id}>
-        <Link to={ `/albums/${album.id}` }>
-          <img width="100" src={`${album.cover}`} alt='Album element' />
-          <p>{album.url}</p>
+      <div className='col' key={album.id}>
+        <Link className='card shadow text-decoration-none text-dark' to={ `/albums/${album.id}` }>
+          <img className='card-img-top shadow-sm object-fit-cover' src={`${album.cover}`} height='300' alt='Album element' />
+          <div className='card-body'>
+            <h5 className='card-title border-bottom pb-2'>
+              { album.title }
+            </h5>
+            { album.description
+              ? <p className='card-text'>{ album.description }</p>
+              : <p className='card-text'>Нет описания</p>
+            }
+          </div>
         </Link>
-      </li>
+      </div>
     )
   });
 
-  const picturePropsList = Array.from(searchResult.pictures).map((picture) => {
-    return (
-      <li key={picture.id}>
-        <Link to={ `/pictures/${picture.id}` }>
-          <img width="100" src={`${picture.photo_file}`} alt='Picture element' />
-          <p>{picture.url}</p>
-        </Link>
-      </li>
-    )
-  });
+  // const picturePropsList = Array.from(searchResult.pictures).map((picture) => {
+  //   return (
+  //     <li key={picture.id}>
+  //       <Link to={ `/pictures/${picture.id}` }>
+  //         <img width="100" src={`${picture.photo_file}`} alt='Picture element' />
+  //         <p>{picture.url}</p>
+  //       </Link>
+  //     </li>
+  //   )
+  // });
 
   return ( 
-      <div className="album-list">
-      <input onChange={ handleSearchChange } />
-      <p>Альбомы</p>
-      { albumPropsList.length > 0
-        ? <div>
-            <div>
-              <input type='button' disabled={ !buttonActivity.previous } onClick={ previousPage } value='<' />
-              <p style={{ display: 'inline' }}>{ page }</p>
-              <input type='button' disabled={ !buttonActivity.next } onClick={ nextPage } value='>' />
+      <div className="container">
+        <div className='mt-2 mb-5'>
+          <h1 className='text-center'>Поиск</h1>
+          <div className='d-flex justify-content-between my-3'>
+            <input className="form-control me-2" onChange={ handleSearchChange } />
+            <div className='pagination d-flex my-auto'>
+              <div 
+                className={ buttonActivity.previous
+                  ? 'page-item'
+                  : 'page-item disabled'
+                }
+              >
+                <input type='button' className='page-link' disabled={ !buttonActivity.previous } onClick={ previousPage } value={'<'}></input>
+              </div>
+              <div className='page-item'>
+                <p className='page-link m-0'>{ page }</p>
+              </div>
+              <div
+                className={ buttonActivity.next
+                  ? 'page-item'
+                  : 'page-item disabled'
+                }
+              >
+                <input type='button' className='page-link' disabled={ !buttonActivity.next } onClick={ nextPage } value={'>'}></input>
+              </div> 
             </div>
-            <ul>{ albumPropsList }</ul>
           </div>
-        : <p>Ничего не найдено</p>
-      }
-      <p>Изображения</p>
-      { picturePropsList.length > 0
-        ? <div>
-            <div>
-              <input type='button' disabled={ !buttonActivity.previous } onClick={ previousPage } value='<' />
-              <p style={{ display: 'inline' }}>{ page }</p>
-              <input type='button' disabled={ !buttonActivity.next } onClick={ nextPage } value='>' />
-            </div>
-            <ul>{ picturePropsList }</ul>
-          </div>
-        : <p>Ничего не найдено</p>
-      }
+          { albumPropsList.length > 0
+            ? <div>
+                <div className='row row-cols-3 g-3'>
+                  { albumPropsList }
+                </div>
+              </div>
+            : <p className='text-center alert alert-warning'>Ничего не найдено</p>
+          }
+          {/* <p>Изображения</p>
+          { picturePropsList.length > 0
+            ? <div>
+                <div>
+                  <input type='button' disabled={ !buttonActivity.previous } onClick={ previousPage } value='<' />
+                  <p style={{ display: 'inline' }}>{ page }</p>
+                  <input type='button' disabled={ !buttonActivity.next } onClick={ nextPage } value='>' />
+                </div>
+                <ul>{ picturePropsList }</ul>
+              </div>
+            : <p>Ничего не найдено</p>
+          } */}
+        </div>
       </div>
   );
 }

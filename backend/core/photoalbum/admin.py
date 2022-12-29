@@ -6,6 +6,7 @@ from django.utils.html import format_html
 
 from import_export.admin import ExportMixin
 from simple_history.admin import SimpleHistoryAdmin
+# from modeltranslation.admin import TranslationAdmin
 
 from .models import Album, Author, Picture, Category, Subcategory
 from .resources import AlbumResource, AuthorResource, PictureResource, CategoryResource, SubcategoryResource
@@ -23,14 +24,17 @@ def custom_titled_filter(title):
 
 @admin.register(Album)
 class AlbumAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
-    list_display = ('title', 'cover_view', 'picture_view', 'owner_view')
+    list_display = ('id', 'title', 'cover_view', 'picture_view', 'owner_view')
     # ordering = ('picture',)
     list_filter = ('owner',)
     search_fields = ("title", )
     resource_classes = [AlbumResource]
 
     def cover_view(self, obj):
-        return format_html('<img height=40 src="{}" />', obj.cover.url)
+        url = (
+            reverse("admin:photoalbum_album_change", args=(obj.id,))
+        )
+        return format_html('<a href={}><img height=40 src="{}" /></a>', url, obj.cover.url)
     
     def picture_view(self, obj):
         count = obj.picture.count()
@@ -55,7 +59,7 @@ class AlbumAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
 
 @admin.register(Author)
 class AuthorAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
-    list_display = ('nickname', 'bio_view', 'picture_view')
+    list_display = ('id', 'nickname', 'bio_view', 'picture_view')
     search_fields = ('nickname',)
     resource_classes = [AuthorResource]
 
@@ -83,7 +87,7 @@ class AuthorAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
 
 @admin.register(Picture)
 class PictureAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
-    list_display = ('photo_view', 'description_view', 'author_view', 'category_view', 'owner_view')
+    list_display = ('id', 'photo_view', 'description_view', 'author_view', 'category_view', 'owner_view')
     list_filter = (
         'owner', 
         ('category__title', custom_titled_filter('Категория')),
@@ -139,7 +143,7 @@ class PictureAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
 
 @admin.register(Category)
 class CategoryAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
-    list_display = ("title", "description_view", 'picture_view', 'subcategory_view', "owner_view")
+    list_display = ('id', "title", "description_view", 'picture_view', 'subcategory_view', "owner_view")
     list_filter = ("owner",)
     search_fields = ("title", "description")
     resource_classes = [CategoryResource]
@@ -186,7 +190,7 @@ class CategoryAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
 
 @admin.register(Subcategory)
 class SubcategoryAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
-    list_display = ('title', 'description_view', 'category_view', 'owner_view')
+    list_display = ('id', 'title', 'description_view', 'category_view', 'owner_view')
     list_filter = (
         ('category__title', custom_titled_filter('Категория')),
         'owner'

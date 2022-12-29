@@ -45,3 +45,6 @@ class HistoryChanges():
                 fields = fields.replace("}", "}}")
             return format_html(fields)
         return None
+
+    changed_fields.short_description = "Измененные поля"
+    list_changes.short_description = "Изменения"

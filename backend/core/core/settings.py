@@ -32,6 +32,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # Third apps
+    'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
+    'import_export',
+    # 'modeltranslation',
+    'simple_history',
+    # Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,12 +49,6 @@ INSTALLED_APPS = [
     # My apps
     'photoalbum',
     'authentication',
-    # Third apps
-    'rest_framework',
-    'rest_framework.authtoken',
-    'corsheaders',
-    'import_export',
-    'simple_history',
 ]
 
 MIDDLEWARE = [
@@ -144,6 +146,11 @@ SIMPLE_JWT = {
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
 LANGUAGE_CODE = 'ru'
+# gettext = lambda s: s
+# LANGUAGES = (
+#     ('ru', gettext('Russian')),
+#     ('en', gettext('English')),
+# )
 
 TIME_ZONE = 'Europe/Moscow'
 

@@ -12,16 +12,32 @@ function FormInput(props) {
     return id;
   }
   return (
-    <label>
+    <label className='form-label col-12'>
       { props.title } <br />
-      <input
-        name={ props.name }
-        id= { nameToId(props.name) }
-        type={ props.type }
-        accept={ props.type == 'file' ? 'image/jpeg,image/png,image/jpg,image/webp': undefined
-        }
-        onChange={ props.onChangeValue }
-      />
+      { props.name == 'photo_file'
+        ? <input
+            className='form-control'
+            required
+            name={ props.name }
+            id= { nameToId(props.name) }
+            type={ props.type }
+            value={ props.value }
+            accept={ props.type == 'file' ? 'image/jpeg,image/png,image/jpg,image/webp': undefined
+            }
+            onChange={ props.onChangeValue }
+          />
+        : <input
+            className='form-control'
+            name={ props.name }
+            id= { nameToId(props.name) }
+            type={ props.type }
+            value={ props.value }
+            accept={ props.type == 'file' ? 'image/jpeg,image/png,image/jpg,image/webp': undefined
+            }
+            onChange={ props.onChangeValue }
+          />
+      }
+      
     </label>
   );
 }

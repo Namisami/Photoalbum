@@ -1,26 +1,52 @@
 from django.core.paginator import Paginator
 from rest_framework import serializers
+from rest_framework.response import Response
 from rest_framework.serializers import HyperlinkedModelSerializer, ListSerializer, SlugRelatedField, ReadOnlyField, IntegerField, SerializerMethodField
 
 from .pagination import StandardResultsSetPagination
 from .models import Picture, Album, Author, Category, Subcategory
 from authentication.serializers import UserSerializer
 
-# class PictureSerializer(HyperlinkedModelSerializer):
-#     id = ReadOnlyField()
-#     class Meta:
-#         model = Picture
-#         exclude = ['url', 'id', 'pk', 'photo_file', 'description', 'upload_date', 'author', 'category', 'subcategory']
 
-class PictureCreateSerializer(HyperlinkedModelSerializer):
+class AuthorSerializer(HyperlinkedModelSerializer):
     class Meta:
-        model = Picture
-        fields = '__all__'
+        model = Author
+        fields = ['url', 'id', 'nickname', 'bio']
 
-class PictureDetailSerializer(HyperlinkedModelSerializer):
+    # def to_representation(self, value):
+    #     print(value)
+    #     return f'{value}8'
+        # return super().to_representation(instance)
+
+
+class CategorySerializer(HyperlinkedModelSerializer):
+    owner = UserSerializer
     class Meta:
-        model = Picture
+        model = Category
+        fields = ['url', 'id', 'title', 'description', 'owner']
+
+
+# class SubcategoryListSerializer(ListSerializer):
+#     def validate(self, data):
+#         print(data)
+#         return data
+
+
+class SubcategorySerializer(HyperlinkedModelSerializer):
+    owner = UserSerializer
+    class Meta:
+        model = Subcategory
         fields = '__all__'
+        # depth = 0
+        # list_serializer_class = SubcategoryListSerializer
+    
+    # def validate(self, data):
+    #     print(data)
+    #     return data
+
+    # def validate_title(self, value):
+    #     print(value)
+    #     return value
 
 
 class PictureListSerializer(HyperlinkedModelSerializer):
@@ -43,10 +69,14 @@ class PictureListSerializer(HyperlinkedModelSerializer):
         model = Picture
         fields = ['url', 'id', 'photo_file', 'description', 'upload_date', 
                 'author', 'category', 'subcategory', 'owner']
-        # depth = 1
+        # fields = '__all__'
+        depth = 1
 
     # def get(self, request, format=None):
     #     print(request)
+
+    # def update(self, instance, validated_data):
+    #     print(validated_data)
 
     # def validate(self, data):
     #     print(data)
@@ -58,12 +88,6 @@ class PictureListSerializer(HyperlinkedModelSerializer):
     #         'bio': value['bio'] if 'bio' in value.keys() else ""
     #     }
     #     return author_object
-
-    # def validate_category(self, value):
-    #     category_object = {
-    #         'title': value['title']
-    #     }
-    #     return category_object
 
     # def validate_subcategory(self, value):
     #     print(111111111, value)
@@ -109,11 +133,18 @@ class PictureListSerializer(HyperlinkedModelSerializer):
 
     # def to_representation(self, value):
     #     print(111111111111111111111111111)
-    #     print(value.items())
+    #     print(value.author)
     #     # return Picture.objects.all()
-    #     serializer = PictureListSerializer(value)
-    #     print(serializer)
-    #     return serializer.data
+    #     # serializer = PictureListSerializer(value)
+    #     # print(serializer)
+    #     return Response({
+    #         'id': value,
+    #         # 'url': value.url,
+    #         'author': value.author,
+    #         'category': value.category,
+    #         'description': value.description,
+    #         'subcategory': value.subcategory,
+    #     })
 
 
 class AlbumSerializer(HyperlinkedModelSerializer):
@@ -140,46 +171,18 @@ class AlbumSerializer(HyperlinkedModelSerializer):
             next = None
             if picture.has_next():
                 next = self.context['request'].build_absolute_uri(self.context['request'].path) + '?page=' + str(picture.next_page_number())
-
+            
             return {
                 'count': count,
                 'next': next,
                 'previous': previous,
                 'results': serializer.data
                 };
+                
 
-
-class AuthorSerializer(HyperlinkedModelSerializer):
-    class Meta:
-        model = Author
-        fields = '__all__'
-
-
-class CategorySerializer(HyperlinkedModelSerializer):
+class AlbumListSerializer(HyperlinkedModelSerializer):
     owner = UserSerializer
+
     class Meta:
-        model = Category
-        fields = '__all__'
-
-
-# class SubcategoryListSerializer(ListSerializer):
-#     def validate(self, data):
-#         print(data)
-#         return data
-
-
-class SubcategorySerializer(HyperlinkedModelSerializer):
-    owner = UserSerializer
-    class Meta:
-        model = Subcategory
-        fields = '__all__'
-        # depth = 0
-        # list_serializer_class = SubcategoryListSerializer
-    
-    # def validate(self, data):
-    #     print(data)
-    #     return data
-
-    # def validate_title(self, value):
-    #     print(value)
-    #     return value
+        model = Album
+        fields = ['url', 'id', 'title', 'description', 'cover', 'created_at', 'owner']
