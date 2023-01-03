@@ -50,7 +50,7 @@ class Picture(models.Model):
     photo_file = models.ImageField(verbose_name="Изображение", upload_to="pictures")
     author = models.ForeignKey(verbose_name="Автор", to=Author, on_delete=models.SET_NULL, null=True, blank=True)
     upload_date = models.DateField(verbose_name="Дата загрузки", auto_now_add=True, blank=True)
-    category = models.ForeignKey(verbose_name="Категория", to=Category, on_delete=models.PROTECT, null=True, blank=True)
+    category = models.ForeignKey(verbose_name="Категория", to=Category, on_delete=models.SET_NULL, null=True, blank=True)
     subcategory = models.ManyToManyField(verbose_name="Подкатегории", to=Subcategory, blank=True)
     description = models.TextField(verbose_name="Описание", blank=True)
     owner = models.ForeignKey(verbose_name="Владелец", to=User, on_delete=models.CASCADE)

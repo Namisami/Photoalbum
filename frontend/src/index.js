@@ -1,16 +1,8 @@
 import ReactDOM from 'react-dom/client';
 import {
-  createBrowserRouter,
-  RouterProvider,
   BrowserRouter as Router,
-  Route,
-  Link,
-  useParams,
 } from "react-router-dom";
 import './index.css';
-import App from './components/App/App';
-// import PictureList from './components/PictureList/PictureList';
-import AlbumList from './components/AlbumList/AlbumList';
 import React from 'react';
 import Header from './components/Header/Header';
 

@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
 import FormInput from '../FormInput/FormInput';
 import './Registration.css';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
 
 const API_URL = 'http://127.0.0.1:9000/api/v1';
 
@@ -16,8 +14,6 @@ function Registration(props) {
     'first_name': '',
     'last_name': '',
   });
-
-  const params = useParams()
   
   const postEntry = async (e) => {
     e.preventDefault();

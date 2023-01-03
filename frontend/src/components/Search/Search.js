@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import './Search.css';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import FormInput from '../FormInput/FormInput';
 
 const API_URL = 'http://127.0.0.1:9000/api/v1';
 
@@ -107,7 +106,7 @@ function Search() {
         <div className='mt-2 mb-5'>
           <h1 className='text-center'>Поиск</h1>
           <div className='d-flex justify-content-between my-3'>
-            <input className="form-control me-2" onChange={ handleSearchChange } />
+            <input className="form-control me-2 shadow-sm" placeholder='Введите запрос..' onChange={ handleSearchChange } />
             <div className='pagination d-flex my-auto'>
               <div 
                 className={ buttonActivity.previous
@@ -138,18 +137,6 @@ function Search() {
               </div>
             : <p className='text-center alert alert-warning'>Ничего не найдено</p>
           }
-          {/* <p>Изображения</p>
-          { picturePropsList.length > 0
-            ? <div>
-                <div>
-                  <input type='button' disabled={ !buttonActivity.previous } onClick={ previousPage } value='<' />
-                  <p style={{ display: 'inline' }}>{ page }</p>
-                  <input type='button' disabled={ !buttonActivity.next } onClick={ nextPage } value='>' />
-                </div>
-                <ul>{ picturePropsList }</ul>
-              </div>
-            : <p>Ничего не найдено</p>
-          } */}
         </div>
       </div>
   );

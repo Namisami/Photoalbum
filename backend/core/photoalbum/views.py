@@ -151,7 +151,8 @@ class AlbumViewSet(ModelViewSet):
     @action(detail=False, methods=['GET'])
     def filled_albums(self, request):
         user = User.objects.get(id=request.user.id)
-        filled = Album.objects.filter(Q(owner=user) & Q(picture__isnull=False)).distinct()
+        # filled = Album.objects.filter(Q(owner=user) & Q(picture__isnull=False)).distinct().order_by('id')
+        filled = Album.objects.filter(Q(picture__isnull=False) | ~Q(cover='../static/images/placeholder.webp'), owner=user).distinct().order_by('id')
         queryset = self.filter_queryset(filled)
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -160,7 +161,7 @@ class AlbumViewSet(ModelViewSet):
 
     def list(self, request):
         user = User.objects.get(id=request.user.id)
-        queryset = Album.objects.filter(owner=user)
+        queryset = Album.objects.filter(owner=user).order_by('id')
         queryset = self.filter_queryset(queryset)
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -199,29 +200,32 @@ class AlbumViewSet(ModelViewSet):
 
         request_data = request.data
         request_data["subcategory"] = request_data.getlist("subcategory")
+        picture = Picture.objects.create(
+            photo_file=request_data["photo_file"],
+            description=request_data["description"],
+            owner=user
+        )
 
-        author = Author.objects.get_or_create(
-            nickname=request_data["author.nickname"]
-        )[0]
-        category = Category.objects.get_or_create(
-            title=request_data["category.title"],
-            owner=user,
-        )[0]
+        if request_data.get('author.nickname', ''):
+            author = Author.objects.get_or_create(
+                nickname=request_data["author.nickname"]
+            )[0]
+            picture.author = author
+        if request_data.get("category.title", ""):
+            category = Category.objects.get_or_create(  
+                title=request_data["category.title"],
+                owner=user
+            )[0]
+            picture.category = category
         subcategories = []
         for subcategory in request_data["subcategory"]:
             subcategory = Subcategory.objects.get_or_create(
                 title=subcategory,
                 category=category,
-                owner=user,
+                owner=user
             )[0]
             subcategories.append(subcategory.id)
-        picture = Picture.objects.create(
-            photo_file=request_data["photo_file"],
-            description=request_data["description"],
-            author=author,
-            category=category,
-            owner=user,
-        )
+        
         for subcategory in subcategories:
             picture.subcategory.add(subcategory)
 
@@ -231,8 +235,6 @@ class AlbumViewSet(ModelViewSet):
 
         serializer = AlbumSerializer(instance, context={'request': request})
         return Response(serializer.data)  
-        print(pk)
-        print(request.data)
 
 
 class AuthorViewSet(ModelViewSet):

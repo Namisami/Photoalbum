@@ -115,13 +115,13 @@ function PictureList(props) {
   }
 
   const handleFormValueChange = (e) => {
-    if (e.target.name == 'subcategory') {
+    if (e.target.name === 'subcategory') {
       let newSubcategory = [];
       for (let value of e.target.value.split(" ")) {
         newSubcategory.push(value)
       }
       setFormValue({ ...formValue, [e.target.name]: newSubcategory });
-    } else if (e.target.name == 'photo_file') {
+    } else if (e.target.name === 'photo_file') {
       setFormValue({ ...formValue, [e.target.name]: e.target.files[0] })
     } else {
       setFormValue({ ...formValue, [e.target.name]: e.target.value });
@@ -160,7 +160,7 @@ function PictureList(props) {
               { picturePropsList }
             </div>
           </div>
-        : <p>Нет элементов</p>
+        : <p className='alert alert-warning my-2'>Нет элементов</p>
       }
         <form method='post'
           className='mb-5'

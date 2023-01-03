@@ -67,7 +67,7 @@ function AlbumList() {
       })
       .then(response => resData = response.data);
     
-    console.log(resData);
+    // console.log(resData);
     let albumList = resData.results;
 
     setButtonActivity({
