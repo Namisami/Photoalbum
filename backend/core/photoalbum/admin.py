@@ -29,6 +29,7 @@ class AlbumAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
     list_filter = ('owner',)
     search_fields = ("title", )
     resource_classes = [AlbumResource]
+    raw_id_fields = ('picture', )
 
     def cover_view(self, obj):
         url = (
@@ -95,6 +96,7 @@ class PictureAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
     )
     search_fields = ("description", "category__title", 'author__nickname', 'subcategory__title')
     resource_classes = [PictureResource]
+    raw_id_fields = ('subcategory', )
 
     def photo_view(self, obj):
         url = (
@@ -202,7 +204,7 @@ class SubcategoryAdmin(ExportMixin, SimpleHistoryAdmin, HistoryChanges):
         description = obj.description if obj.description else "Нет описания"
 
         url = (
-            reverse("admin:photoalbum_category_change", args=(obj.id,))
+            reverse("admin:photoalbum_subcategory_change", args=(obj.id,))
         )
         return format_html('<a href={}>{}</a>', url, description)
 

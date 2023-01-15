@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.filters import SearchFilter
+from rest_framework import status
 from django.core import serializers
 from django.db.models import Q, Count, Sum
 from django.shortcuts import get_object_or_404
@@ -29,6 +30,7 @@ class PictureViewSet(ModelViewSet):
     # pagination_class = StandardResultsSetPagination
 
     def list(self, request):
+        # print(aasd)
         user = User.objects.get(id=request.user.id)
         queryset = Picture.objects.filter(owner=user).order_by('id')
         queryset = self.filter_queryset(queryset)

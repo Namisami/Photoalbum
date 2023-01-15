@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from .views import PictureViewSet, AlbumViewSet, AuthorViewSet, CategoryViewSet, SubcategoryViewSet
 
+
 router = DefaultRouter()
 router.register(r'pictures', PictureViewSet)
 router.register(r'albums', AlbumViewSet)
